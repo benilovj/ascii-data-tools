@@ -1,0 +1,236 @@
+require 'set'
+
+module AsciiDataTools
+  module RecordType    
+    class Type
+      attr_reader :name
+      
+      def initialize(name, fields = [])
+        @name = name
+        @fields = fields
+      end
+      
+      def [](field_name)
+        @fields.detect {|field| field.name == field_name}
+      end
+      
+      def <<(field)
+        @fields << field
+      end
+      
+      def field_names
+        @fields.collect {|f| f.name}
+      end
+      
+      def length_of_longest_field_name
+        @length_of_longest_field_name ||= field_names.max_by {|name| name.length }.length
+      end
+      
+      def total_length_of_fields
+        @total_length ||= @fields.inject(0) {|sum, field| sum + field.length}
+      end
+      
+      def matching?(ascii_string)
+        ascii_string =~ regexp_for_matching_type
+      end
+      
+      def length_of_longest_field_name
+        @length_of_longest_field_name ||= field_names.max_by {|name| name.length }.length
+      end
+      
+      def constraints_description
+        @fields.select {|field| field.constrained?}.map {|field| field.constraint_description}.join(", ")
+      end
+      
+      def decode(ascii_string)
+        Record::Record.new(self, split_into_values(ascii_string))
+      end
+      
+      protected
+      def split_into_values(ascii_string)
+        ascii_string.match(regexp_for_matching_type).to_a[1..-1]
+      end
+      
+      def regexp_string
+        @fields.inject("\\A") {|regexp_string, field| field.extend_regexp_string_for_matching(regexp_string) } + "\\z"
+      end
+
+      def regexp_for_matching_type
+        @regexp ||= Regexp.new(regexp_string, Regexp::MULTILINE)
+      end
+    end
+    
+    class UnknownType < Type
+      UNKNOWN_RECORD_TYPE_NAME = "unknown"
+      
+      def initialize
+        super(UNKNOWN_RECORD_TYPE_NAME, [Field.new("UNKNOWN")])
+      end
+      
+      def decode(ascii_string)
+        Record::Record.new(self, [ascii_string])
+      end
+    end
+    
+    class TypeWithFilenameRestrictions < Type
+      def initialize(type_name, fields = [], filename_constraint = FilenameConstraint.new)
+        super(type_name, fields)
+        @filename_constraint = filename_constraint
+      end
+      
+      def matching?(ascii_string, context_filename = nil)
+        @filename_constraint.satisfied_by?(context_filename) and super(ascii_string)
+      end
+      
+      def filename_should_match(regexp)
+        @filename_constraint = RegexpConstraint.new(regexp)
+      end
+      
+      def constraints_description
+        descriptions = [@filename_constraint.to_s, super].reject {|desc| desc.empty?}
+        descriptions.join(", ")
+      end
+    end
+    
+    class Field
+      attr_reader :name
+      attr_writer :constraint
+      
+      def initialize(name)
+        @name = name
+      end
+      
+      def constrained?
+        not @constraint.nil?
+      end
+      
+      def constraint_description
+        name + " " + @constraint.to_s
+      end
+    end
+    
+    class FixedLengthField < Field
+      attr_reader :length
+      
+      def initialize(name, length)
+        super(name)
+        @length = length
+      end
+      
+      def extend_regexp_string_for_matching(regexp_string)
+        if @constraint.nil?
+          regexp_string + "(.{#{@length}})"
+        else
+          @constraint.extend_regexp_string_for_matching(regexp_string)
+        end
+      end
+    end
+    
+    class OneOfConstraint
+      def initialize(*possible_values)
+        @possible_values = possible_values.flatten
+      end
+      
+      def extend_regexp_string_for_matching(regexp_string)
+        regexp_string + "(#{@possible_values.join('|')})"
+      end
+      
+      def to_s
+        if @possible_values.length == 1
+          "= #{@possible_values.first}"
+        else
+          "one of #{@possible_values.join(', ')}"
+        end
+      end
+    end
+    
+    class RegexpConstraint
+      def initialize(regexp_that_must_match)
+        @regexp_that_must_match = regexp_that_must_match
+      end
+      
+      def satisfied_by?(string)
+        string =~ @regexp_that_must_match
+      end
+      
+      def to_s
+        "=~ #{@regexp_that_must_match.inspect}"
+      end
+    end
+    
+    class FilenameConstraint
+      def initialize(constraint = nil)
+        @filename_constraint = constraint
+      end
+      
+      def satisfied_by?(string)
+        @filename_constraint.nil? or @filename_constraint.satisfied_by?(string)
+      end
+      
+      def to_s
+        unless @filename_constraint.nil?
+          "Filename #{@filename_constraint.to_s}"
+        else
+          ""
+        end
+      end
+      
+      class << self
+        def satisfied_by_filenames_matching(regexp)
+          new(RegexpConstraint.new(regexp))
+        end
+      end
+    end
+    
+    def equal_to(value)
+      OneOfConstraint.new([value])
+    end
+    
+    def one_of(values)
+      OneOfConstraint.new(values)
+    end
+    
+    class TypeDeterminer
+      def initialize(type_repo = RecordTypeRepository.new)
+        @all_types = type_repo
+        @previously_matched_types = RecordTypeRepository.new
+      end
+      
+      def determine_type_for(encoded_record_string, context_filename = nil)
+        matching_type = 
+          @previously_matched_types.find_for_record(encoded_record_string, context_filename) || 
+          @all_types.find_for_record(encoded_record_string, context_filename)
+        if matching_type.nil?
+          return UnknownType.new
+        else
+          @previously_matched_types << matching_type
+          return matching_type
+        end
+      end
+    end
+    
+    class RecordTypeRepository
+      include Enumerable
+      
+      def initialize(types = [])
+        @types = Set.new(types)
+      end
+      
+      def <<(type)
+        @types << type
+      end
+      
+      def find_by_name(name)
+        detect {|type| type.name == name}
+      end
+      
+      def each(&block)
+        @types.each(&block)
+      end
+      
+      def find_for_record(encoded_record_string, context_filename)
+        @types.detect {|type| type.matching?(encoded_record_string, context_filename) }
+      end
+    end
+  end
+end

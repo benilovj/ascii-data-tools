@@ -1,0 +1,4 @@
+* create an IBAN number plugin
+  http://www.swift.com/solutions/messaging/information_products/directory_products/iban_format_registry/index.page
+  http://code.google.com/p/php-iban
+* create an example autodiscovery file, document it, write test which utilizes it
