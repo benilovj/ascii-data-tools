@@ -1,0 +1,51 @@
+= Ascii Data Tools
+
+A suite of tools for identifying, reading, enriching and editing 
+ASCII data records
+
+Such records are commonly used for data transfer within the banking
+(e.g. transfer statements between banks) and telecommunications
+sectors (e.g. call detail records).
+
+== Installation:
+
+  Install [Gemcutter](http://gemcutter.org) then execute:
+  $ sudo gem install ascii-data-tools
+
+== Features:
+=== (already implemented)
+
+* Automatic identification and decoding of fixed length records from 
+flat files, gzipped files or input streams
+
+=== (coming soon)
+
+* csv and variable-length record processing
+* ASCII file editing
+* record normalisation
+
+== Examples:
+
+Coming soon!
+
+== Supported platforms:
+
+Ruby 1.8.7, 1.9.1 under *nix
+
+== License:
+
+Copyright (C) 2010  Jake Benilov <benilov@gmail.com>
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License
+as published by the Free Software Foundation; either version 2
+of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
