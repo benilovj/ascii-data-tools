@@ -1,3 +1,3 @@
-require 'ascii_edit'
+require 'ascii-data-tools'
 
-require 'ascii_edit/configuration_printer'
+require 'ascii-data-tools/configuration_printer'

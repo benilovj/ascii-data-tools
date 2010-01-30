@@ -6,7 +6,7 @@ Before do |scenario|
   
   @command_line = []
   
-  @record_types = AsciiEdit::RecordType::RecordTypeRepository.new
+  @record_types = AsciiDataTools::RecordType::RecordTypeRepository.new
 end
 
 Given /^a record stream containing$/ do |string|
@@ -19,13 +19,13 @@ Given /^file "([^\"]*)" containing$/ do |filename, string|
 end
 
 When /^ascii_cat is invoked$/ do
-  configuration = AsciiEdit::Configuration.new(@command_line,
-    :input_source  => AsciiEdit::InputSource.new(@record_source_filename, @input_stream),
+  configuration = AsciiDataTools::Configuration.new(@command_line,
+    :input_source  => AsciiDataTools::InputSource.new(@record_source_filename, @input_stream),
     :output_stream => @output_stream,
     :record_types  => @record_types
   )
   
-  AsciiEdit::Controller::CatController.new(configuration).run
+  AsciiDataTools::Controller::CatController.new(configuration).run
 end
 
 Then /^the following is printed out:$/ do |string|
@@ -33,11 +33,11 @@ Then /^the following is printed out:$/ do |string|
 end
 
 Given /^fixed\-length record type "([^\"]*)":$/ do |record_type_name, record_type_definition_table|
-  extend AsciiEdit::RecordType
+  extend AsciiDataTools::RecordType
   
   fields = []
   record_type_definition_table.hashes.each do |hash|
-    field = AsciiEdit::RecordType::FixedLengthField.new(hash["field name"], hash["field length"].to_i)
+    field = AsciiDataTools::RecordType::FixedLengthField.new(hash["field name"], hash["field length"].to_i)
     constraint_text = hash["constraint"]
     unless constraint_text.nil? or constraint_text.empty?
       if constraint_text =~ /= (.*)/
@@ -50,7 +50,7 @@ Given /^fixed\-length record type "([^\"]*)":$/ do |record_type_name, record_typ
     end
     fields << field
   end
-  @record_types << record_type = AsciiEdit::RecordType::TypeWithFilenameRestrictions.new(record_type_name, fields)
+  @record_types << record_type = AsciiDataTools::RecordType::TypeWithFilenameRestrictions.new(record_type_name, fields)
 end
 
 Given /^fixed\-length record type "([^\"]*)" which applies for filenames matching "([^\"]*)":$/ do |record_type_name, context_filename_string, record_type_definition_table|

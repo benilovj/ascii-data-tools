@@ -1,7 +1,7 @@
 = Ascii Data Tools
 
 A suite of tools for identifying, reading, enriching and editing 
-ASCII data records
+ASCII data records.
 
 Such records are commonly used for data transfer within the banking
 (e.g. transfer statements between banks) and telecommunications
@@ -32,7 +32,7 @@ Coming soon!
 
 == Supported platforms:
 
-Ruby 1.8.7, 1.9.1 under *nix
+Tested with Ruby 1.8.7, 1.9.1 under *nix
 
 == License:
 
