@@ -22,10 +22,6 @@ module AsciiDataTools
         @fields.collect {|f| f.name}
       end
       
-      def length_of_longest_field_name
-        @length_of_longest_field_name ||= field_names.max_by {|name| name.length }.length
-      end
-      
       def total_length_of_fields
         @total_length ||= @fields.inject(0) {|sum, field| sum + field.length}
       end
@@ -96,8 +92,9 @@ module AsciiDataTools
       attr_reader :name
       attr_writer :constraint
       
-      def initialize(name)
+      def initialize(name, constraint = nil)
         @name = name
+        @constraint = constraint
       end
       
       def constrained?
@@ -112,8 +109,8 @@ module AsciiDataTools
     class FixedLengthField < Field
       attr_reader :length
       
-      def initialize(name, length)
-        super(name)
+      def initialize(name, length, constraint = nil)
+        super(name, constraint)
         @length = length
       end
       

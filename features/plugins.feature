@@ -19,11 +19,13 @@ Feature: tools for plugins
     When the record type configuration is printed
     Then it should look like this:
       """
-      +-----------+--------------+-------------+
-      | type name | total length | constraints |
-      +-----------+--------------+-------------+
-      | DEF       | 7            |             |
-      | ABC       | 9            |             |
-      +-----------+--------------+-------------+
+      +-----------+--------------+-------------------------+
+      | type name | total length | constraints             |
+      +-----------+--------------+-------------------------+
+      | DEF       | 7            |                         |
+      | ABC       | 9            |                         |
+      | EXAMPLE02 | 30           | RECORD_TYPE = EXAMPLE02 |
+      | EXAMPLE01 | 49           | RECORD_TYPE = EXAMPLE01 |
+      +-----------+--------------+-------------------------+
       
       """

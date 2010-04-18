@@ -68,3 +68,40 @@ Feature: ascii_cat support
 
 
       """
+      
+  Scenario: out-of-the-box example record types defined and configured
+    Given file "records.gz" containing
+      """
+      EXAMPLE01MO 4912345678      442012345678    0012
+      EXAMPLE02internet    07220156
+      EXAMPLE01SMS4998765432      55555           0099
+      
+      """
+    When ascii_cat is invoked
+    Then the following is printed out:
+      """
+      Record 01 (EXAMPLE01)
+      01 RECORD_TYPE      : [EXAMPLE01]------------
+      02 USAGE            : [MO ]------------------
+      03 A_NUMBER         : [4912345678      ]-----
+      04 B_NUMBER         : [442012345678    ]-----
+      05 CHARGEABLE_UNITS : [0012]-----------------
+      06 END_OF_RECORD    : [\n]-------------------
+
+      Record 02 (EXAMPLE02)
+      01 RECORD_TYPE      : [EXAMPLE02]--------
+      02 APN              : [internet    ]-----
+      03 SESSION_DURATION : [0722]-------------
+      04 CHARGEABLE_UNITS : [0156]-------------
+      05 END_OF_RECORD    : [\n]---------------
+
+      Record 03 (EXAMPLE01)
+      01 RECORD_TYPE      : [EXAMPLE01]------------
+      02 USAGE            : [SMS]------------------
+      03 A_NUMBER         : [4998765432      ]-----
+      04 B_NUMBER         : [55555           ]-----
+      05 CHARGEABLE_UNITS : [0099]-----------------
+      06 END_OF_RECORD    : [\n]-------------------
+
+
+      """
