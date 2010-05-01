@@ -229,5 +229,25 @@ module AsciiDataTools
         @types.detect {|type| type.matching?(encoded_record_string, context_filename) }
       end
     end
+
+    class TypeBuilder
+      def initialize(type_name, &block)
+        @name = type_name
+        @fields = []
+
+        instance_eval(&block) unless block.nil?
+      end
+
+      def build
+        TypeWithFilenameRestrictions.new(@name, @fields)
+      end
+
+      protected
+      def field(name, properties)
+        field = FixedLengthField.new(name, properties[:length])
+        field.constraint = OneOfConstraint.new(properties[:value_is]) unless properties[:value_is].nil?        
+        @fields << field
+      end
+    end
   end
 end

@@ -261,5 +261,33 @@ module AsciiDataTools
         repo.map {|type| type}.should have(1).item
       end
     end
+
+    describe TypeBuilder do
+      it "should create a type with the given name" do
+        TypeBuilder.new("ABC").build.name.should == "ABC"
+      end
+
+      context "for fixed-length types" do
+        before do
+          @record_type = TypeBuilder.new("ABC") do
+            field "RECORD_TYPE",   :length => 3, :value_is => "ABC"
+            field "A_NUMBER",      :length => 16
+            field "END_OF_RECORD", :length => 1
+          end.build
+        end
+
+        it "should have the correct fields" do
+          @record_type.field_names.should == ["RECORD_TYPE", "A_NUMBER", "END_OF_RECORD"]
+        end
+
+        it "should have the correct length" do
+          @record_type.total_length_of_fields.should == 20
+        end
+
+        it "should have the correct constraints" do
+          @record_type.constraints_description.should == "RECORD_TYPE = ABC"
+        end
+      end
+    end
   end
 end

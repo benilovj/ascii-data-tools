@@ -8,8 +8,12 @@ module AsciiDataTools
 
     alias :register_record_type :register_record_types
 
+    def define_record_type(name, &definition)
+      register_record_type(RecordType::TypeBuilder.new(name, &definition).build)
+    end
+
     def clear_record_types
-      @@record_types = []
+      @@record_types = RecordType::RecordTypeRepository.new
     end
 
     def record_types

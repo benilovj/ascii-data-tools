@@ -29,3 +29,25 @@ Feature: tools for plugins
       +-----------+--------------+-------------------------+
       
       """
+
+  Scenario: DSL for defining new records
+    Given the following is specified in discover.rb:
+      """
+      AsciiDataTools.define_record_type("REC01") do
+        field "RECORD_TYPE",      :length => 5, :value_is => "REC01"
+        field "A_NUMBER",         :length => 16
+        field "END_OF_RECORD",    :length => 1
+      end
+      """
+    When the record type configuration is printed
+    Then it should look like this:
+      """
+      +-----------+--------------+-------------------------+
+      | type name | total length | constraints             |
+      +-----------+--------------+-------------------------+
+      | REC01     | 22           | RECORD_TYPE = REC01     |
+      | EXAMPLE02 | 30           | RECORD_TYPE = EXAMPLE02 |
+      | EXAMPLE01 | 49           | RECORD_TYPE = EXAMPLE01 |
+      +-----------+--------------+-------------------------+
+
+      """

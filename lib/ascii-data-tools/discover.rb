@@ -1,18 +1,16 @@
-include AsciiDataTools::RecordType
+AsciiDataTools.define_record_type("EXAMPLE01") do
+  field "RECORD_TYPE",      :length => 9, :value_is => "EXAMPLE01"
+  field "USAGE",            :length => 3
+  field "A_NUMBER",         :length => 16
+  field "B_NUMBER",         :length => 16
+  field "CHARGEABLE_UNITS", :length => 4
+  field "END_OF_RECORD",    :length => 1
+end
 
-AsciiDataTools.register_record_type(TypeWithFilenameRestrictions.new("EXAMPLE01", [
-  FixedLengthField.new("RECORD_TYPE",      9, OneOfConstraint.new("EXAMPLE01")),
-  FixedLengthField.new("USAGE",            3),
-  FixedLengthField.new("A_NUMBER",         16),
-  FixedLengthField.new("B_NUMBER",         16),
-  FixedLengthField.new("CHARGEABLE_UNITS", 4),
-  FixedLengthField.new("END_OF_RECORD",    1)
-]))
-
-AsciiDataTools.register_record_type(TypeWithFilenameRestrictions.new("EXAMPLE02", [
-  FixedLengthField.new("RECORD_TYPE",      9, OneOfConstraint.new("EXAMPLE02")),
-  FixedLengthField.new("APN",              12),
-  FixedLengthField.new("SESSION_DURATION", 4),
-  FixedLengthField.new("CHARGEABLE_UNITS", 4),
-  FixedLengthField.new("END_OF_RECORD",    1)
-]))
+AsciiDataTools.define_record_type("EXAMPLE02") do
+  field "RECORD_TYPE",      :length => 9, :value_is => "EXAMPLE02"
+  field "APN",              :length => 12
+  field "SESSION_DURATION", :length => 4
+  field "CHARGEABLE_UNITS", :length => 4
+  field "END_OF_RECORD",    :length => 1
+end
