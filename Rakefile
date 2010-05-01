@@ -19,7 +19,7 @@ spec = Gem::Specification.new do |s|
   s.requirements << 'none'
   s.require_path = 'lib'
   s.bindir = 'bin'
-  s.executables = ['ascii_cat']
+  s.executables = ['ascii_cat', 'ascii-data-tools-config']
   s.files = FileList["{lib,spec,features}/**/*"].to_a + ['Rakefile']
   s.description = s.summary
 end

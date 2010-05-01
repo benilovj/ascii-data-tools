@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require 'ascii-data-tools'
+require 'ascii-data-tools/configuration_printer'
+
+AsciiDataTools.autodiscover
+
+puts "Types ordered by length:"
+puts AsciiDataTools::RecordTypesConfigurationPrinter.for_record_types(AsciiDataTools.record_types).summary
