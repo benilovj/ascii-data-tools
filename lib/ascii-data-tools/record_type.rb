@@ -96,13 +96,21 @@ module AsciiDataTools
         @name = name
         @constraint = constraint
       end
-      
+
       def constrained?
         not @constraint.nil?
       end
       
       def constraint_description
         name + " " + @constraint.to_s
+      end
+
+      def should_be_constrained_to(value)
+        if value.is_a?(Regexp)
+          @constraint = RegexpConstraint.new(value)
+        else
+          @constraint = OneOfConstraint.new(value)
+        end
       end
     end
     
@@ -145,11 +153,15 @@ module AsciiDataTools
       def initialize(regexp_that_must_match)
         @regexp_that_must_match = regexp_that_must_match
       end
-      
+
+      def extend_regexp_string_for_matching(regexp_string)
+        regexp_string + @regexp_that_must_match.source
+      end
+
       def satisfied_by?(string)
         string =~ @regexp_that_must_match
       end
-      
+
       def to_s
         "=~ #{@regexp_that_must_match.inspect}"
       end
@@ -159,11 +171,11 @@ module AsciiDataTools
       def initialize(constraint = nil)
         @filename_constraint = constraint
       end
-      
+
       def satisfied_by?(string)
         @filename_constraint.nil? or @filename_constraint.satisfied_by?(string)
       end
-      
+
       def to_s
         unless @filename_constraint.nil?
           "Filename #{@filename_constraint.to_s}"
@@ -171,28 +183,20 @@ module AsciiDataTools
           ""
         end
       end
-      
+
       class << self
         def satisfied_by_filenames_matching(regexp)
           new(RegexpConstraint.new(regexp))
         end
       end
     end
-    
-    def equal_to(value)
-      OneOfConstraint.new([value])
-    end
-    
-    def one_of(values)
-      OneOfConstraint.new(values)
-    end
-    
+
     class TypeDeterminer
       def initialize(type_repo = RecordTypeRepository.new)
         @all_types = type_repo
         @previously_matched_types = RecordTypeRepository.new
       end
-      
+
       def determine_type_for(encoded_record_string, context_filename = nil)
         matching_type = 
           @previously_matched_types.find_for_record(encoded_record_string, context_filename) || 
@@ -205,26 +209,26 @@ module AsciiDataTools
         end
       end
     end
-    
+
     class RecordTypeRepository
       include Enumerable
       
       def initialize(types = [])
         @types = Set.new(types)
       end
-      
+
       def <<(type)
         @types << type
       end
-      
+
       def find_by_name(name)
         detect {|type| type.name == name}
       end
-      
+
       def each(&block)
         @types.each(&block)
       end
-      
+
       def find_for_record(encoded_record_string, context_filename)
         @types.detect {|type| type.matching?(encoded_record_string, context_filename) }
       end
@@ -245,7 +249,7 @@ module AsciiDataTools
       protected
       def field(name, properties)
         field = FixedLengthField.new(name, properties[:length])
-        field.constraint = OneOfConstraint.new(properties[:value_is]) unless properties[:value_is].nil?        
+        field.should_be_constrained_to(properties[:constrained_to]) unless properties[:constrained_to].nil?
         @fields << field
       end
     end

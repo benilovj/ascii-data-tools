@@ -30,10 +30,10 @@ Given /^fixed\-length record type "([^\"]*)":$/ do |record_type_name, record_typ
     unless constraint_text.nil? or constraint_text.empty?
       if constraint_text =~ /= (.*)/
         value = constraint_text.split("= ")[1]
-        field.constraint = equal_to(value)
+        field.should_be_constrained_to(value)
       elsif constraint_text =~ /one of/
         list_of_possible_values = constraint_text.split("one of ")[1].split(", ")
-        field.constraint = one_of(list_of_possible_values)
+        field.should_be_constrained_to(list_of_possible_values)
       end
     end
     fields << field

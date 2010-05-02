@@ -78,7 +78,7 @@ module AsciiDataTools
         end
         
         it "should take into account constraints that are set on the fields when matching" do
-          @type["field100"].constraint = equal_to("ABC")
+          @type["field100"].should_be_constrained_to("ABC")
           @type.should be_matching("ABC12345\n")
           @type.should_not be_matching("XYZ12345\n")
         end
@@ -88,10 +88,10 @@ module AsciiDataTools
         end
         
         it "should provide a list of comma-delimited field constraints as the constraints description" do
-          @type["field100"].constraint = equal_to("ABC")
+          @type["field100"].should_be_constrained_to("ABC")
           @type.constraints_description.should == "field100 = ABC"
           
-          @type["field10"].constraint = equal_to("DEF")
+          @type["field10"].should_be_constrained_to("DEF")
           @type.constraints_description.should == "field100 = ABC, field10 = DEF"          
         end
       end
@@ -167,6 +167,10 @@ module AsciiDataTools
     end
     
     describe RegexpConstraint do
+      it "should contribute to a regexp string that matches the type" do
+        RegexpConstraint.new(/A\d{3}C/).extend_regexp_string_for_matching("xxx").should == "xxxA\\d{3}C"
+      end
+      
       it "should be satisfied when the string passed to it matches its regexp" do
         RegexpConstraint.new(/ABC/).should be_satisfied_by("xyz.ABC.gz")
         RegexpConstraint.new(/ABC/).should_not be_satisfied_by("xyz.UVW.gz")
@@ -270,8 +274,8 @@ module AsciiDataTools
       context "for fixed-length types" do
         before do
           @record_type = TypeBuilder.new("ABC") do
-            field "RECORD_TYPE",   :length => 3, :value_is => "ABC"
-            field "A_NUMBER",      :length => 16
+            field "RECORD_TYPE",   :length => 3,  :constrained_to => "ABC"
+            field "A_NUMBER",      :length => 16, :constrained_to => /123/
             field "END_OF_RECORD", :length => 1
           end.build
         end
@@ -285,7 +289,7 @@ module AsciiDataTools
         end
 
         it "should have the correct constraints" do
-          @record_type.constraints_description.should == "RECORD_TYPE = ABC"
+          @record_type.constraints_description.should == "RECORD_TYPE = ABC, A_NUMBER =~ /123/"
         end
       end
     end
