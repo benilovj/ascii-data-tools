@@ -24,7 +24,7 @@ module AsciiDataTools
       require 'rubygems'
 
       configuration_files_from_newest_gem_versions = Gem.find_files('ascii-data-tools/discover.rb').select do |path|
-        Gem.latest_load_paths.any? {|load_path| path.include?(load_path)}
+        Gem.latest_load_paths.any? {|load_path| path.include?(load_path)} or not path.include?(Gem.default_dir)
       end
 
       configuration_files_from_newest_gem_versions.each {|f| load f}

@@ -29,7 +29,7 @@ Rake::GemPackageTask.new(spec) do |pkg|
 end
 
 task :install_gem => :package do
-  `sudo gem install pkg/*.gem`
+  `sudo gem install pkg/*.gem --no-ri --no-rdoc`
 end
 
 task :default => :install_gem
