@@ -117,20 +117,10 @@ module AsciiDataTools
         Field.new("name").name.should == "name"
       end
       
-      it "should not be constrained by default" do
-        Field.new("name").should_not be_constrained
-      end
-      
       context "a constrained field" do
-        it "should know that it's constrained" do
-          field = Field.new("name")
-          field.constraint = mock("constraint")
-          field.should be_constrained
-        end
-        
         it "should provide a text description of the constraint" do
           field = Field.new("name")
-          field.constraint = mock("constraint", :to_s => "= abc")
+          field.should_be_constrained_to("abc")
           field.constraint_description.should == "name = abc"
         end
       end
@@ -150,6 +140,16 @@ module AsciiDataTools
         field.constraint = mock("field constraint", :extend_regexp_string_for_matching => "xxxabc")
         field.extend_regexp_string_for_matching("xxx").should == "xxxabc"
       end      
+    end
+    
+    describe FixedLengthConstraint do
+      it "should contribute to a regexp string by limiting the number of characters" do
+        FixedLengthConstraint.new(5).extend_regexp_string_for_matching('xxx').should == "xxx(.{5})"
+      end
+      
+      it "should have an empty string representation" do
+        FixedLengthConstraint.new(5).to_s.should be_empty
+      end
     end
     
     describe OneOfConstraint do
@@ -250,6 +250,7 @@ module AsciiDataTools
         repo = RecordTypeRepository.new
         repo << mock(Type, :name => "ABC") << mock(Type, :name => "DEF")
         repo.find_by_name("ABC").name.should == "ABC"
+        repo.type("ABC").name.should == "ABC"
         repo.find_by_name("XYZ").should be_nil
       end
       
@@ -264,6 +265,14 @@ module AsciiDataTools
         repo = RecordTypeRepository.new([type, type])
         repo.map {|type| type}.should have(1).item
       end
+      
+      it "should find types by name" do
+        repo = RecordTypeRepository.new
+        repo << mock(Type, :name => "ABC", :matching? => false) << mock(Type, :name => "DEF", :matching? => :true) << mock(Type, :name => "XYZ", :matching? => :true)
+        found_type_names = []
+        repo.for_names_matching(/ABC|DEF/) {|type| found_type_names << type.name}
+        found_type_names.sort.should == ["ABC", "DEF"]
+      end      
     end
 
     describe TypeBuilder do

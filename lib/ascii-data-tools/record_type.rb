@@ -4,6 +4,7 @@ module AsciiDataTools
   module RecordType    
     class Type
       attr_reader :name
+      attr_reader :fields
       
       def initialize(name, fields = [])
         @name = name
@@ -35,7 +36,7 @@ module AsciiDataTools
       end
       
       def constraints_description
-        @fields.select {|field| field.constrained?}.map {|field| field.constraint_description}.join(", ")
+        @fields.reject {|field| field.constraint_description.empty? }.map {|field| field.constraint_description}.join(", ")
       end
       
       def decode(ascii_string)
@@ -92,17 +93,17 @@ module AsciiDataTools
       attr_reader :name
       attr_writer :constraint
       
-      def initialize(name, constraint = nil)
+      def initialize(name, constraint = NoConstraint.new)
         @name = name
         @constraint = constraint
       end
-
-      def constrained?
-        not @constraint.nil?
-      end
       
       def constraint_description
-        name + " " + @constraint.to_s
+        unless @constraint.to_s.empty?
+          name + " " + @constraint.to_s
+        else
+          ""
+        end
       end
 
       def should_be_constrained_to(value)
@@ -118,17 +119,33 @@ module AsciiDataTools
       attr_reader :length
       
       def initialize(name, length, constraint = nil)
-        super(name, constraint)
+        super(name, constraint || FixedLengthConstraint.new(length))
         @length = length
       end
       
       def extend_regexp_string_for_matching(regexp_string)
-        if @constraint.nil?
-          regexp_string + "(.{#{@length}})"
-        else
-          @constraint.extend_regexp_string_for_matching(regexp_string)
-        end
+        @constraint.extend_regexp_string_for_matching(regexp_string)
       end
+    end
+    
+    class NoConstraint
+      def extend_regexp_string_for_matching(regexp_string)
+        regexp_string
+      end
+      
+      def to_s; ""; end
+    end
+    
+    class FixedLengthConstraint
+      def initialize(length)
+        @length = length
+      end
+      
+      def extend_regexp_string_for_matching(regexp_string)
+        regexp_string + "(.{#{@length}})"
+      end
+      
+      def to_s; ""; end
     end
     
     class OneOfConstraint
@@ -225,12 +242,18 @@ module AsciiDataTools
         detect {|type| type.name == name}
       end
 
+      alias :type :find_by_name
+
       def each(&block)
         @types.each(&block)
       end
 
       def find_for_record(encoded_record_string, context_filename)
         @types.detect {|type| type.matching?(encoded_record_string, context_filename) }
+      end
+      
+      def for_names_matching(regexp, &block)
+        select {|type| type.name =~ regexp}.each {|found_type| block[found_type]}
       end
     end
 
