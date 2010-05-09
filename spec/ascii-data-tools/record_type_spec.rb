@@ -268,11 +268,20 @@ module AsciiDataTools
       
       it "should find types by name" do
         repo = RecordTypeRepository.new
-        repo << mock(Type, :name => "ABC", :matching? => false) << mock(Type, :name => "DEF", :matching? => :true) << mock(Type, :name => "XYZ", :matching? => :true)
+        repo << mock(Type, :name => "ABC") << mock(Type, :name => "DEF") << mock(Type, :name => "XYZ")
         found_type_names = []
         repo.for_names_matching(/ABC|DEF/) {|type| found_type_names << type.name}
         found_type_names.sort.should == ["ABC", "DEF"]
-      end      
+      end
+      
+      it "should find types by name using a block" do
+        repo = RecordTypeRepository.new
+        repo << mock(Type, :name => "ABC") << mock(Type, :name => "DEF") << mock(Type, :name => "XYZ")
+        found_type_names = []
+        matcher = lambda {|name| ["ABC", "DEF"].include?(name) }
+        repo.for_names_matching(matcher) {|type| found_type_names << type.name}
+        found_type_names.sort.should == ["ABC", "DEF"]        
+      end
     end
 
     describe TypeBuilder do

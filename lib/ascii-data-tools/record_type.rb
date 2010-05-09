@@ -252,8 +252,12 @@ module AsciiDataTools
         @types.detect {|type| type.matching?(encoded_record_string, context_filename) }
       end
       
-      def for_names_matching(regexp, &block)
-        select {|type| type.name =~ regexp}.each {|found_type| block[found_type]}
+      def for_names_matching(matcher, &block)
+        if matcher.is_a?(Regexp)
+          select {|type| type.name =~ matcher}.each {|found_type| block[found_type]}
+        elsif matcher.is_a?(Proc)
+          select {|type| matcher[type.name]}.each {|found_type| block[found_type]}
+        end
       end
     end
 

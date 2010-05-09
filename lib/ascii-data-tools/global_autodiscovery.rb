@@ -2,8 +2,12 @@ module AsciiDataTools
   @@record_types = RecordType::RecordTypeRepository.new
   
   class << self
-    def register_record_types(*record_types)
-      record_types.inject(@@record_types) {|types, type| types << type; type}
+    def register_record_types(*new_record_types)
+      new_record_types.inject(@@record_types) {|types, type| types << type; type}
+    end
+
+    def configure_record_types(&block)
+      @@record_types.instance_eval(&block)
     end
 
     alias :register_record_type :register_record_types
