@@ -30,6 +30,7 @@ module AsciiDataTools
     class Type
       include RecordDecoder
       attr_reader :name
+      attr_reader :fields
       
       def initialize(name, fields = [])
         @name = name
@@ -59,9 +60,6 @@ module AsciiDataTools
       def constraints_description
         @fields.reject {|field| field.constraint_description.empty? }.map {|field| field.constraint_description}.join(", ")
       end
-      
-      protected
-      attr_reader :fields
     end
     
     class UnknownType < Type
