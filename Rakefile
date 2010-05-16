@@ -16,6 +16,9 @@ spec = Gem::Specification.new do |s|
   s.summary = "A tool for decoding and modifying ASCII CDRs."
   s.name = 'ascii-data-tools'
   s.version = "0.3"
+  s.author = 'Jake Benilov'
+  s.email = 'benilov@gmail.com'
+  s.homepage = 'http://github.com/benilovj/ascii-data-tools'
   s.requirements << 'none'
   s.require_path = 'lib'
   s.bindir = 'bin'
