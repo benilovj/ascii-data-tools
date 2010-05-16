@@ -45,8 +45,6 @@ module AsciiDataTools
       end
       
       context "(for fixed length records)" do
-        include AsciiDataTools::RecordType
-        
         before do
           @type = type("ABC") do
             field "field100", :length => 3
@@ -71,10 +69,6 @@ module AsciiDataTools
           @type.total_length_of_fields.should == 9
         end
         
-        it "should match an ascii string that has the same total length as the individual fields" do
-          @type.should be_matching("ABC12345\n")
-        end
-        
         it "should provide an empty constraints description when there are no constraints" do
           @type.constraints_description.should be_empty
         end
@@ -97,26 +91,27 @@ module AsciiDataTools
           field("field1",   :length => 5),
           field("field10",  :length => 1)
         ]
-        @decoder = RecordDecoder.new(@fields)
+        @type = Struct.new(:fields).new(@fields)
+        @type.extend(RecordDecoder)
       end
       
       it "should know whether a given string is decodable" do
-        @decoder.should be_able_to_decode("ABC12345\n")
+        @type.should be_able_to_decode("ABC12345\n")
       end
       
       it "should decode records correctly" do
-        @decoder.decode("XYZ12345\n").should == ["XYZ", "12345", "\n"]
+        @type.decode("XYZ12345\n").values.should == ["XYZ", "12345", "\n"]
       end
       
       it "should take into account constraints that are set on the fields" do
         @fields[0].should_be_constrained_to("ABC")
-        @decoder.should be_able_to_decode("ABC12345\n")
-        @decoder.should_not be_able_to_decode("XYZ12345\n")
+        @type.should be_able_to_decode("ABC12345\n")
+        @type.should_not be_able_to_decode("XYZ12345\n")
       end
       
       it "should not match ascii strings that don't have the same length as the individual fields" do
-        @decoder.should_not be_able_to_decode("ABC1234\n")
-        @decoder.should_not be_able_to_decode("ABC123456\n")
+        @type.should_not be_able_to_decode("ABC1234\n")
+        @type.should_not be_able_to_decode("ABC123456\n")
       end
     end
     

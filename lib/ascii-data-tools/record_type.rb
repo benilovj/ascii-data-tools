@@ -1,14 +1,39 @@
 require 'set'
 
 module AsciiDataTools
-  module RecordType    
+  module RecordType
+    module RecordDecoder
+      def able_to_decode?(ascii_string)
+        ascii_string =~ regexp_for_matching_type
+      end
+            
+      def decode(ascii_string)
+        Record::Record.new(self, split_into_values(ascii_string))
+      end
+      
+      alias :matching? :able_to_decode?
+
+      protected
+      def split_into_values(ascii_string)
+        ascii_string.match(regexp_for_matching_type).to_a[1..-1]
+      end
+      
+      def regexp_string
+        fields.inject("\\A") {|regexp_string, field| field.extend_regexp_string_for_matching(regexp_string) } + "\\z"
+      end
+
+      def regexp_for_matching_type
+        @regexp ||= Regexp.new(regexp_string, Regexp::MULTILINE)
+      end
+    end
+    
     class Type
+      include RecordDecoder
       attr_reader :name
       
       def initialize(name, fields = [])
         @name = name
         @fields = fields
-        @decoder = RecordDecoder.new(@fields)
       end
       
       def [](field_name)
@@ -27,10 +52,6 @@ module AsciiDataTools
         @total_length ||= @fields.inject(0) {|sum, field| sum + field.length}
       end
       
-      def matching?(ascii_string)
-        @decoder.able_to_decode?(ascii_string)
-      end
-      
       def length_of_longest_field_name
         @length_of_longest_field_name ||= field_names.max_by {|name| name.length }.length
       end
@@ -39,36 +60,8 @@ module AsciiDataTools
         @fields.reject {|field| field.constraint_description.empty? }.map {|field| field.constraint_description}.join(", ")
       end
       
-      def decode(ascii_string)
-        Record::Record.new(self, @decoder.decode(ascii_string))
-      end
-    end
-    
-    class RecordDecoder
-      def initialize(fields)
-        @fields = fields
-      end
-      
-      def able_to_decode?(ascii_string)
-        ascii_string =~ regexp_for_matching_type
-      end
-      
-      def decode(ascii_string)
-        split_into_values(ascii_string)
-      end
-      
       protected
-      def split_into_values(ascii_string)
-        ascii_string.match(regexp_for_matching_type).to_a[1..-1]
-      end
-      
-      def regexp_string
-        @fields.inject("\\A") {|regexp_string, field| field.extend_regexp_string_for_matching(regexp_string) } + "\\z"
-      end
-
-      def regexp_for_matching_type
-        @regexp ||= Regexp.new(regexp_string, Regexp::MULTILINE)
-      end
+      attr_reader :fields
     end
     
     class UnknownType < Type
