@@ -26,14 +26,14 @@ module AsciiDataTools
     end
     
     it "should present every record type as a row" do
-      record_types = [type("ABC").build, type("DEF").build]
+      record_types = [type("ABC"), type("DEF")]
       RecordTypesConfigurationPresenter.new(record_types).record_type_summaries[0].should == ["ABC", 0, ""]
       RecordTypesConfigurationPresenter.new(record_types).record_type_summaries[1].should == ["DEF", 0, ""]      
     end
     
     it "should sort the record types by the total length" do
-      longer_record_type = type("longer").with(fixed_length_field("XYZ", 5)).build
-      shorter_record_type = type("shorter").with(fixed_length_field("ABC", 3)).build
+      longer_record_type = type("longer") { field 'XYZ', :length => 5 }
+      shorter_record_type = type("shorter") { field 'ABC', :length => 3 }
       record_types = [longer_record_type, shorter_record_type]
       RecordTypesConfigurationPresenter.new(record_types).record_type_summaries[0].first.should == "shorter"
       RecordTypesConfigurationPresenter.new(record_types).record_type_summaries[1].first.should == "longer"

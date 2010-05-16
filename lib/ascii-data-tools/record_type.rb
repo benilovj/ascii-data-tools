@@ -4,11 +4,11 @@ module AsciiDataTools
   module RecordType    
     class Type
       attr_reader :name
-      attr_reader :fields
       
       def initialize(name, fields = [])
         @name = name
         @fields = fields
+        @decoder = RecordDecoder.new(@fields)
       end
       
       def [](field_name)
@@ -28,7 +28,7 @@ module AsciiDataTools
       end
       
       def matching?(ascii_string)
-        ascii_string =~ regexp_for_matching_type
+        @decoder.able_to_decode?(ascii_string)
       end
       
       def length_of_longest_field_name
@@ -40,7 +40,21 @@ module AsciiDataTools
       end
       
       def decode(ascii_string)
-        Record::Record.new(self, split_into_values(ascii_string))
+        Record::Record.new(self, @decoder.decode(ascii_string))
+      end
+    end
+    
+    class RecordDecoder
+      def initialize(fields)
+        @fields = fields
+      end
+      
+      def able_to_decode?(ascii_string)
+        ascii_string =~ regexp_for_matching_type
+      end
+      
+      def decode(ascii_string)
+        split_into_values(ascii_string)
       end
       
       protected
@@ -80,7 +94,8 @@ module AsciiDataTools
       end
       
       def filename_should_match(regexp)
-        @filename_constraint = RegexpConstraint.new(regexp)
+        @filename_constraint = FilenameConstraint.satisfied_by_filenames_matching(regexp)
+        self
       end
       
       def constraints_description
@@ -275,9 +290,15 @@ module AsciiDataTools
 
       protected
       def field(name, properties)
+        @fields << FieldBuilder.new.build(name, properties)
+      end
+    end
+    
+    class FieldBuilder
+      def build(name, properties)
         field = FixedLengthField.new(name, properties[:length])
         field.should_be_constrained_to(properties[:constrained_to]) unless properties[:constrained_to].nil?
-        @fields << field
+        field
       end
     end
   end

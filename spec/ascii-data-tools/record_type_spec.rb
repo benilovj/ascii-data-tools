@@ -5,7 +5,10 @@ module AsciiDataTools
     describe TypeWithFilenameRestrictions do
       include RecordTypeHelpers
       it "should match only when both the filename and field restrictions are satisfied" do
-        type = type("ABC").with(fixed_length_field("f1", 3), fixed_length_field("f2", 1)).applicable_when_filename_matches(/abc[.]gz/).build
+        type = type("ABC") do
+          field 'f1', :length => 3
+          field 'f2', :length => 1
+        end.filename_should_match(/abc[.]gz/)
         
         type.should be_matching("XYZ\n", "abc.gz")
         type.should_not be_matching("XY\n", "abc.gz")
@@ -14,13 +17,12 @@ module AsciiDataTools
       end
       
       it "can accept another filename restriction" do
-        type = type("ABC").applicable_when_filename_matches(/abc[.]gz/).build
+        type = type("ABC").filename_should_match(/abc[.]gz/)
         type.should be_matching("", "abc.gz")
         
         type.filename_should_match(/xyz[.]gz/)
         type.should_not be_matching("", "abc.gz")
         type.should be_matching("", "xyz.gz")
-        
       end
       
       describe "string representation" do
@@ -29,7 +31,8 @@ module AsciiDataTools
         end
           
         it "should include the file constraint if one exists" do
-          type = type("ABC").applicable_when_filename_matches(/abc[.]gz/).build
+          type = type("ABC").filename_should_match(/abc[.]gz/)
+          
           type.constraints_description.should include('/abc[.]gz/')
         end
       end      
@@ -38,22 +41,22 @@ module AsciiDataTools
     describe Type do
       include RecordTypeHelpers
       it "should have a name" do
-        type("ABC").build.name.should == "ABC"
-      end
-      
-      it "should be possible to add new fields" do
-        fields = type("ABC").with(field("field1")).build.field_names.should == ["field1"]
+        type("ABC").name.should == "ABC"
       end
       
       context "(for fixed length records)" do
         include AsciiDataTools::RecordType
         
         before do
-          @type = type("ABC").with(
-            fixed_length_field("field100", 3),
-            fixed_length_field("field1", 5),
-            fixed_length_field("field10", 1)
-          ).build
+          @type = type("ABC") do
+            field "field100", :length => 3
+            field "field1",   :length => 5
+            field "field10",  :length => 1
+          end
+        end
+
+        it "should provide the field names" do
+          @type.field_names.should == ["field100", "field1", "field10"]
         end
         
         it "should provide the length of the field with the longest name" do
@@ -72,17 +75,6 @@ module AsciiDataTools
           @type.should be_matching("ABC12345\n")
         end
         
-        it "should not match ascii strings that don't have the same length as the individual fields" do
-          @type.should_not be_matching("ABC1234\n")
-          @type.should_not be_matching("ABC123456\n")
-        end
-        
-        it "should take into account constraints that are set on the fields when matching" do
-          @type["field100"].should_be_constrained_to("ABC")
-          @type.should be_matching("ABC12345\n")
-          @type.should_not be_matching("XYZ12345\n")
-        end
-        
         it "should provide an empty constraints description when there are no constraints" do
           @type.constraints_description.should be_empty
         end
@@ -94,6 +86,37 @@ module AsciiDataTools
           @type["field10"].should_be_constrained_to("DEF")
           @type.constraints_description.should == "field100 = ABC, field10 = DEF"          
         end
+      end
+    end
+    
+    describe RecordDecoder do
+      include RecordTypeHelpers
+      before do
+        @fields = [
+          field("field100", :length => 3),
+          field("field1",   :length => 5),
+          field("field10",  :length => 1)
+        ]
+        @decoder = RecordDecoder.new(@fields)
+      end
+      
+      it "should know whether a given string is decodable" do
+        @decoder.should be_able_to_decode("ABC12345\n")
+      end
+      
+      it "should decode records correctly" do
+        @decoder.decode("XYZ12345\n").should == ["XYZ", "12345", "\n"]
+      end
+      
+      it "should take into account constraints that are set on the fields" do
+        @fields[0].should_be_constrained_to("ABC")
+        @decoder.should be_able_to_decode("ABC12345\n")
+        @decoder.should_not be_able_to_decode("XYZ12345\n")
+      end
+      
+      it "should not match ascii strings that don't have the same length as the individual fields" do
+        @decoder.should_not be_able_to_decode("ABC1234\n")
+        @decoder.should_not be_able_to_decode("ABC123456\n")
       end
     end
     

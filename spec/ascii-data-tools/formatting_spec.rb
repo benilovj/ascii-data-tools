@@ -11,18 +11,17 @@ STR
 include RecordTypeHelpers
 
 def fixed_length_type
-  type("ABC").with(
-    fixed_length_field("field1", 5),
-    fixed_length_field("field10", 3),
-    fixed_length_field("field3", 1)
-  ).build
+  type("ABC") do
+    field 'field1',  :length => 5
+    field 'field10', :length => 3
+    field 'field3',  :length => 1
+  end
 end
 
 module AsciiDataTools
   module Formatting
     describe Formatter do
       it "should format a fixed-length record" do
-        # fixed_length_type = 
         record = AsciiDataTools::Record::Record.new(fixed_length_type, ["12345", "abc", "\n"])
         Formatter.new.format(record).should == EXPECTED_FORMATTING_OF_FIXED_LENGTH_RECORD
       end
