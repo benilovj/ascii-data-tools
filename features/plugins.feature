@@ -33,11 +33,13 @@ Feature: tools for plugins
   Scenario: DSL for defining new records
     Given the following is specified in discover.rb:
       """
-      AsciiDataTools.define_record_type("REC01") do
-        field "RECORD_TYPE",      :length => 5,  :constrained_to => "REC01"
-        field "A_NUMBER",         :length => 16, :constrained_to => /44123/
-        field "END_OF_RECORD",    :length => 1
-      end
+      AsciiDataTools.configure do
+        define_record_type("REC01") do
+	        field "RECORD_TYPE",      :length => 5,  :constrained_to => "REC01"
+	        field "A_NUMBER",         :length => 16, :constrained_to => /44123/
+	        field "END_OF_RECORD",    :length => 1
+	      end
+	    end
       """
     When the record type configuration is printed
     Then it should look like this:

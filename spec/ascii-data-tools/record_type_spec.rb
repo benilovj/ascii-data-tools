@@ -87,9 +87,9 @@ module AsciiDataTools
       include RecordTypeHelpers
       before do
         @fields = [
-          field("field100", :length => 3),
-          field("field1",   :length => 5),
-          field("field10",  :length => 1)
+          make_field("field100", :length => 3),
+          make_field("field1",   :length => 5),
+          make_field("field10",  :length => 1)
         ]
         @type = Struct.new(:fields).new(@fields)
         @type.extend(RecordDecoder)
@@ -300,20 +300,27 @@ module AsciiDataTools
         repo.for_names_matching(matcher) {|type| found_type_names << type.name}
         found_type_names.sort.should == ["ABC", "DEF"]        
       end
+      
+      it "should include the builder for new types for convenience" do
+        repo = RecordTypeRepository.new
+        repo.define_record_type("ABC") { field "xyz", :length => 3 }
+        repo.type("ABC").should have(1).fields
+      end
     end
 
     describe TypeBuilder do
+      include TypeBuilder
       it "should create a type with the given name" do
-        TypeBuilder.new("ABC").build.name.should == "ABC"
+        build_type("ABC").name.should == "ABC"
       end
 
       context "for fixed-length types" do
         before do
-          @record_type = TypeBuilder.new("ABC") do
+          @record_type = build_type("ABC") do
             field "RECORD_TYPE",   :length => 3,  :constrained_to => "ABC"
             field "A_NUMBER",      :length => 16, :constrained_to => /123/
             field "END_OF_RECORD", :length => 1
-          end.build
+          end
         end
 
         it "should have the correct fields" do

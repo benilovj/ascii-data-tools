@@ -235,8 +235,31 @@ module AsciiDataTools
       end
     end
 
+    module FieldBuilder
+      def build_field(name, properties)
+        field = FixedLengthField.new(name, properties[:length])
+        field.should_be_constrained_to(properties[:constrained_to]) unless properties[:constrained_to].nil?
+        field
+      end
+    end
+
+    module TypeBuilder
+      include FieldBuilder
+      def build_type(type_name, &block)
+        @fields = []
+        instance_eval(&block) unless block.nil?
+        TypeWithFilenameRestrictions.new(type_name, @fields)
+      end
+
+      protected
+      def field(name, properties)
+        @fields << build_field(name, properties)
+      end
+    end
+    
     class RecordTypeRepository
       include Enumerable
+      include TypeBuilder
       
       def initialize(types = [])
         @types = Set.new(types)
@@ -267,31 +290,9 @@ module AsciiDataTools
           select {|type| matcher[type.name]}.each {|found_type| block[found_type]}
         end
       end
-    end
-
-    class TypeBuilder
-      def initialize(type_name, &block)
-        @name = type_name
-        @fields = []
-
-        instance_eval(&block) unless block.nil?
-      end
-
-      def build
-        TypeWithFilenameRestrictions.new(@name, @fields)
-      end
-
-      protected
-      def field(name, properties)
-        @fields << FieldBuilder.new.build(name, properties)
-      end
-    end
-    
-    class FieldBuilder
-      def build(name, properties)
-        field = FixedLengthField.new(name, properties[:length])
-        field.should_be_constrained_to(properties[:constrained_to]) unless properties[:constrained_to].nil?
-        field
+      
+      def define_record_type(name, &definition)
+        self << build_type(name, &definition)
       end
     end
   end

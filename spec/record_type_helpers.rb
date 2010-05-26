@@ -1,10 +1,8 @@
 module RecordTypeHelpers
-  def type(name, &block)
-    AsciiDataTools::RecordType::TypeBuilder.new(name, &block).build
-  end
+  include AsciiDataTools::RecordType::TypeBuilder
+  include AsciiDataTools::RecordType::FieldBuilder
   
-  def field(name, properties)
-    AsciiDataTools::RecordType::FieldBuilder.new.build(name, properties)
-  end
+  alias :type :build_type
+  alias :make_field :build_field
 end
   
