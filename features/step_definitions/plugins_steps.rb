@@ -1,7 +1,4 @@
 Given /^the following configuration:$/ do |code|
-  # AsciiDataTools.configure do
-  #   
-  # end
   @record_types.instance_eval(code)
 end
 

@@ -14,7 +14,7 @@ Feature: encoding and decoding of records
 		  """
     When I decode an encoded fixed-length record "ABC12345\n" of type "ABC"
     Then I should have a decoded record of type "ABC" and contents:
-      | field name       | field value |
+      | field name    | field value |
       | RECORD_TYPE   | ABC         |
       | RECORD_SIZE   | 12345       |
       | END_OF_RECORD | \n          |
