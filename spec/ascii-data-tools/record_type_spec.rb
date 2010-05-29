@@ -264,6 +264,14 @@ module AsciiDataTools
         should be_a_kind_of(Enumerable)
       end
       
+      it "should have a reset switch" do
+        repo = RecordTypeRepository.new
+        repo << mock(Type, :name => "ABC") << mock(Type, :name => "DEF")
+        repo.clear
+        repo.type("ABC").should be_nil
+        repo.type("DEF").should be_nil        
+      end
+      
       it "should find record types by name" do
         repo = RecordTypeRepository.new
         repo << mock(Type, :name => "ABC") << mock(Type, :name => "DEF")
@@ -303,7 +311,7 @@ module AsciiDataTools
       
       it "should include the builder for new types for convenience" do
         repo = RecordTypeRepository.new
-        repo.define_record_type("ABC") { field "xyz", :length => 3 }
+        repo.record_type("ABC") { field "xyz", :length => 3 }
         repo.type("ABC").should have(1).fields
       end
     end
@@ -312,6 +320,12 @@ module AsciiDataTools
       include TypeBuilder
       it "should create a type with the given name" do
         build_type("ABC").name.should == "ABC"
+      end
+
+      it "should create a type which matches only for specific filenames (if given)" do
+        type = build_type("ABC", :applies_for_filenames_matching => /ABC/)
+        type.should be_matching("", "ABC.gz")
+        type.should_not be_matching("", "XYZ.gz")
       end
 
       context "for fixed-length types" do

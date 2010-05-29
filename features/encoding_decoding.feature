@@ -4,14 +4,17 @@ Feature: encoding and decoding of records
   I want a tool to be able to handle different types of records
   
   Scenario: decoding fixed-length records
-    Given fixed-length record type "ABC":
-      | field name       |  field length |
-      | MD_RECORD_TYPE   |  3            |
-      | MD_RECORD_SIZE   |  5            |
-      | MD_END_OF_RECORD |  1            |
+	  Given the following configuration:
+		  """
+			record_type("ABC") do
+			  field "RECORD_TYPE",   :length => 3, :constrained_to => "ABC"
+			  field "RECORD_SIZE",   :length => 5
+			  field "END_OF_RECORD", :length => 1
+			end
+		  """
     When I decode an encoded fixed-length record "ABC12345\n" of type "ABC"
     Then I should have a decoded record of type "ABC" and contents:
       | field name       | field value |
-      | MD_RECORD_TYPE   | ABC         |
-      | MD_RECORD_SIZE   | 12345       |
-      | MD_END_OF_RECORD | \n          |
+      | RECORD_TYPE   | ABC         |
+      | RECORD_SIZE   | 12345       |
+      | END_OF_RECORD | \n          |

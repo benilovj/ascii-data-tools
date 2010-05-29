@@ -245,10 +245,12 @@ module AsciiDataTools
 
     module TypeBuilder
       include FieldBuilder
-      def build_type(type_name, &block)
+      def build_type(type_name, properties = {}, &block)
         @fields = []
         instance_eval(&block) unless block.nil?
-        TypeWithFilenameRestrictions.new(type_name, @fields)
+        type = TypeWithFilenameRestrictions.new(type_name, @fields)
+        type.filename_should_match(properties[:applies_for_filenames_matching]) unless properties[:applies_for_filenames_matching].nil?
+        type
       end
 
       protected
@@ -267,6 +269,10 @@ module AsciiDataTools
 
       def <<(type)
         @types << type
+      end
+
+      def clear
+        @types.clear
       end
 
       def find_by_name(name)
@@ -291,8 +297,8 @@ module AsciiDataTools
         end
       end
       
-      def define_record_type(name, &definition)
-        self << build_type(name, &definition)
+      def record_type(name, props = {}, &definition)
+        self << build_type(name, props, &definition)
       end
     end
   end
