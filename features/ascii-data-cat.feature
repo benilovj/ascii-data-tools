@@ -1,4 +1,4 @@
-Feature: ascii_cat support
+Feature: ascii-data-cat support
   In order to understand the contents of ascii-encoded record streams quicker
   As a tester
   I want a tool to decode and pretty print the streams
@@ -20,7 +20,7 @@ Feature: ascii_cat support
       ABC67890
       
       """
-    When ascii_cat is invoked
+    When ascii-data-cat is invoked
     Then the following is printed out:
       """
       Record 01 (ABC)
@@ -42,7 +42,7 @@ Feature: ascii_cat support
       XYZ123456789
 
       """    
-    When ascii_cat is invoked
+    When ascii-data-cat is invoked
     Then the following is printed out:
       """
       Record 01 (unknown)
@@ -66,7 +66,7 @@ Feature: ascii_cat support
       ABC123456
 
       """    
-    When ascii_cat is invoked
+    When ascii-data-cat is invoked
     Then the following is printed out:
       """
       Record 01 (unknown)
@@ -83,7 +83,7 @@ Feature: ascii_cat support
       EXAMPLE01SMS4998765432      55555           0099
       
       """
-    When ascii_cat is invoked
+    When ascii-data-cat is invoked
     Then the following is printed out:
       """
       Record 01 (EXAMPLE01)

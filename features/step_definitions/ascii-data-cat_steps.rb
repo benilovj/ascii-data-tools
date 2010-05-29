@@ -20,7 +20,7 @@ Given /^file "([^\"]*)" containing$/ do |filename, string|
   Given "a record stream containing", string
 end
 
-When /^ascii_cat is invoked$/ do
+When /^ascii-data-cat is invoked$/ do
   configuration = AsciiDataTools::Configuration.new(@command_line,
     :input_source  => AsciiDataTools::InputSource.new(@record_source_filename, @input_stream),
     :output_stream => @output_stream,
