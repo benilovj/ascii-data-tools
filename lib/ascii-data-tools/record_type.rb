@@ -104,6 +104,15 @@ module AsciiDataTools
       def initialize(name, constraint = NoConstraint.new)
         @name = name
         @constraint = constraint
+        @normalised = false
+      end
+      
+      def normalised?
+        @normalised
+      end
+      
+      def should_be_normalised
+        @normalised = true
       end
       
       def constraint_description
@@ -239,6 +248,7 @@ module AsciiDataTools
       def build_field(name, properties)
         field = FixedLengthField.new(name, properties[:length])
         field.should_be_constrained_to(properties[:constrained_to]) unless properties[:constrained_to].nil?
+        field.should_be_normalised if properties[:normalised]
         field
       end
     end
