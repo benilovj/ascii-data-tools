@@ -41,7 +41,7 @@ module AsciiDataTools
     def define_optionparser_configuration
       OptionParser.new do |opts|
         opts.banner = [
-          "Usage: ascii_cat [options] <input source>",
+          "Usage: ascii-data-cat [options] <input source>",
           "An input source can be a flat file, a gzipped flat file or - (STDIN)",
           "\n"].join("\n")
         

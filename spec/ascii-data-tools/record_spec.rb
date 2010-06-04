@@ -24,51 +24,16 @@ module AsciiDataTools
         lambda {Record.new(mock(AsciiDataTools::RecordType::Type, :field_names => ["existing"]), ["xyz"])['non-existing'] }.should raise_error(/non-existing.*does not exist/)
       end
     end
-
-    describe Source do
-      it "should be enumerable" do
-        Source.new(nil, nil).should be_an(Enumerable)
-      end
-      
-      it "should turn encoded records read from the input stream into records and yield them" do
-        input_source = AsciiDataTools::InputSource.new("filename", StringIO.new("abc\ndef\n"))
-        determiner = mock(AsciiDataTools::RecordType::TypeDeterminer)
-        determiner.stub!(:determine_type_for).with("abc\n", "filename").and_return(mock(AsciiDataTools::RecordType::Type, :decode => "record abc"))
-        determiner.stub!(:determine_type_for).with("def\n", "filename").and_return(mock(AsciiDataTools::RecordType::Type, :decode => "record def"))
-        
-        resultant_records = Source.new(input_source, determiner).collect {|r| r}
-        resultant_records.should == ["record abc", "record def"]
-      end      
-    end
     
-    describe Sink do
-      it "should transform the received records and write them to the stream" do
-        transformer = mock("record transformer")
-        transformer.should_receive(:transform).with(anything).and_return("XYZ")
-        output_stream = StringIO.new
-        
-        Sink.new(output_stream, transformer).receive(mock(Record))
-        output_stream.string.should == "XYZ"
-      end
-      
-      it "should flush and close the output stream when corresponding call is made" do
-        output_stream = mock(IO)
-        output_stream.should_receive(:flush).ordered
-        output_stream.should_receive(:close).ordered
-        
-        Sink.new(output_stream, nil).flush_and_close
-      end
-    end
+    describe TransformingPipeline do
+      it "should read input records, transform them and write them to the output" do
+        input_source = AsciiDataTools::InputSource.new("filename", StringIO.new("abc\ndef\n"))
+        output = StringIO.new        
+        pipeline = TransformingPipeline.new {|record, filename| "#{filename}:#{record.strip.reverse}\n"}
 
-    describe Pipeline do
-      it "should read records from a record source and write them to a record sink" do
-        record_source = [mock(Record), mock(Record)]
-        record_sink = mock(Sink)
-        record_sink.should_receive(:receive).with(record_source.first).ordered
-        record_sink.should_receive(:receive).with(record_source.last).ordered
-        record_sink.should_receive(:flush_and_close).ordered
-        
-        Pipeline.new(record_source, record_sink).start_flow        
+        pipeline.stream(input_source, output)
+
+        output.string.should == "filename:cba\nfilename:fed\n"
       end
     end
   end

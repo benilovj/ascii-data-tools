@@ -1,31 +1,11 @@
 module AsciiDataTools
-  @@record_types = RecordType::RecordTypeRepository.new
-  
   class << self
-    def register_record_types(*new_record_types)
-      new_record_types.inject(@@record_types) {|types, type| types << type; type}
+    def configure(&block)
+      record_types.instance_eval(&block)
     end
-
-    def configure_record_types(&block)
-      @@record_types.instance_eval(&block)
-    end
-
-    alias :register_record_type :register_record_types
-
-    def define_record_type(name, &definition)
-      register_record_type(make_record_type(name, &definition))
-    end
-
-    def make_record_type(name, &definition)
-      RecordType::TypeBuilder.new(name, &definition).build
-    end
-
-    def clear_record_types
-      @@record_types = RecordType::RecordTypeRepository.new
-    end
-
+    
     def record_types
-      @@record_types
+      @record_types ||= RecordType::RecordTypeRepository.new
     end
 
     def autodiscover

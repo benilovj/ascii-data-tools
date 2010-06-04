@@ -1,14 +1,17 @@
-Feature: ascii_cat support
+Feature: ascii-data-cat support
   In order to understand the contents of ascii-encoded record streams quicker
   As a tester
   I want a tool to decode and pretty print the streams
   
   Background:
-    Given fixed-length record type "ABC":
-      | field name       |  field length |
-      | MD_RECORD_TYPE   |  3            |
-      | MD_RECORD_SIZE   |  5            |
-      | MD_END_OF_RECORD |  1            |
+	  Given the following configuration:
+		  """
+			record_type("ABC") do
+			  field "RECORD_TYPE",   :length => 3, :constrained_to => "ABC"
+			  field "RECORD_SIZE",   :length => 5
+			  field "END_OF_RECORD", :length => 1
+			end
+		  """	
   
   Scenario: two fixed-length records
     Given a record stream containing
@@ -17,18 +20,18 @@ Feature: ascii_cat support
       ABC67890
       
       """
-    When ascii_cat is invoked
+    When ascii-data-cat is invoked
     Then the following is printed out:
       """
       Record 01 (ABC)
-      01 MD_RECORD_TYPE   : [ABC]-------
-      02 MD_RECORD_SIZE   : [12345]-----
-      03 MD_END_OF_RECORD : [\n]--------
+      01 RECORD_TYPE   : [ABC]-------
+      02 RECORD_SIZE   : [12345]-----
+      03 END_OF_RECORD : [\n]--------
       
       Record 02 (ABC)
-      01 MD_RECORD_TYPE   : [ABC]-------
-      02 MD_RECORD_SIZE   : [67890]-----
-      03 MD_END_OF_RECORD : [\n]--------
+      01 RECORD_TYPE   : [ABC]-------
+      02 RECORD_SIZE   : [67890]-----
+      03 END_OF_RECORD : [\n]--------
       
       
       """
@@ -39,7 +42,7 @@ Feature: ascii_cat support
       XYZ123456789
 
       """    
-    When ascii_cat is invoked
+    When ascii-data-cat is invoked
     Then the following is printed out:
       """
       Record 01 (unknown)
@@ -50,17 +53,20 @@ Feature: ascii_cat support
       
   Scenario: record types can be limited to apply only to records contained in particular filenames
     # In this example, the record should not be recognised with type XYZ because the source filename does not match /records[.]XYZ[.]gz/
-    Given fixed-length record type "XYZ" which applies for filenames matching "records[.]XYZ[.]gz":
-      | field name       |  field length |
-      | MD_RECORD_TYPE   |  3            |
-      | MD_RECORD_SIZE   |  6            |
-      | MD_END_OF_RECORD |  1            |
+    Given the following configuration:
+      """
+      record_type("XYZ", :applies_for_filenames_matching => /records[.]XYZ[.]gz/) do
+        field "RECORD_TYPE",   :length => 3
+        field "RECORD_SIZE",   :length => 6
+        field "END_OF_RECORD", :length => 1
+      end
+      """
     And file "records.ABC.gz" containing
       """
       ABC123456
 
       """    
-    When ascii_cat is invoked
+    When ascii-data-cat is invoked
     Then the following is printed out:
       """
       Record 01 (unknown)
@@ -77,7 +83,7 @@ Feature: ascii_cat support
       EXAMPLE01SMS4998765432      55555           0099
       
       """
-    When ascii_cat is invoked
+    When ascii-data-cat is invoked
     Then the following is printed out:
       """
       Record 01 (EXAMPLE01)

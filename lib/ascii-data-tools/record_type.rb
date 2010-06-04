@@ -27,8 +27,15 @@ module AsciiDataTools
       end
     end
     
+    module Normaliser
+      def normalise(encoded_record)
+        encoded_record
+      end
+    end
+    
     class Type
       include RecordDecoder
+      include Normaliser
       attr_reader :name
       attr_reader :fields
       
@@ -102,6 +109,15 @@ module AsciiDataTools
       def initialize(name, constraint = NoConstraint.new)
         @name = name
         @constraint = constraint
+        @normalised = false
+      end
+      
+      def normalised?
+        @normalised
+      end
+      
+      def should_be_normalised
+        @normalised = true
       end
       
       def constraint_description
@@ -233,8 +249,34 @@ module AsciiDataTools
       end
     end
 
+    module FieldBuilder
+      def build_field(name, properties)
+        field = FixedLengthField.new(name, properties[:length])
+        field.should_be_constrained_to(properties[:constrained_to]) unless properties[:constrained_to].nil?
+        field.should_be_normalised if properties[:normalised]
+        field
+      end
+    end
+
+    module TypeBuilder
+      include FieldBuilder
+      def build_type(type_name, properties = {}, &block)
+        @fields = []
+        instance_eval(&block) unless block.nil?
+        type = TypeWithFilenameRestrictions.new(type_name, @fields)
+        type.filename_should_match(properties[:applies_for_filenames_matching]) unless properties[:applies_for_filenames_matching].nil?
+        type
+      end
+
+      protected
+      def field(name, properties)
+        @fields << build_field(name, properties)
+      end
+    end
+    
     class RecordTypeRepository
       include Enumerable
+      include TypeBuilder
       
       def initialize(types = [])
         @types = Set.new(types)
@@ -242,6 +284,10 @@ module AsciiDataTools
 
       def <<(type)
         @types << type
+      end
+
+      def clear
+        @types.clear
       end
 
       def find_by_name(name)
@@ -265,31 +311,9 @@ module AsciiDataTools
           select {|type| matcher[type.name]}.each {|found_type| block[found_type]}
         end
       end
-    end
-
-    class TypeBuilder
-      def initialize(type_name, &block)
-        @name = type_name
-        @fields = []
-
-        instance_eval(&block) unless block.nil?
-      end
-
-      def build
-        TypeWithFilenameRestrictions.new(@name, @fields)
-      end
-
-      protected
-      def field(name, properties)
-        @fields << FieldBuilder.new.build(name, properties)
-      end
-    end
-    
-    class FieldBuilder
-      def build(name, properties)
-        field = FixedLengthField.new(name, properties[:length])
-        field.should_be_constrained_to(properties[:constrained_to]) unless properties[:constrained_to].nil?
-        field
+      
+      def record_type(name, props = {}, &definition)
+        self << build_type(name, props, &definition)
       end
     end
   end

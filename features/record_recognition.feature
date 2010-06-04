@@ -4,36 +4,44 @@ Feature: intelligent record recognition
   I want a tool to correctly recognise the record type without user intervention
   
   Background:
-    Given fixed-length record type "ABC":
-      | field name       |  field length | constraint |
-      | MD_RECORD_TYPE   |  3            | = ABC      |
-      | MD_RECORD_SIZE   |  5            |            |
-      | MD_END_OF_RECORD |  1            |            |
-    And fixed-length record type "DEF":
-      | field name       |  field length | constraint |
-      | MD_RECORD_TYPE   |  3            | = DEF      |
-      | MD_RECORD_SIZE   |  5            |            |
-      | MD_END_OF_RECORD |  1            |            |
-    And fixed-length record type "GXX":
-      | field name       |  field length | constraint      |
-      | MD_RECORD_TYPE   |  3            | one of G01, G02 |
-      | MD_RECORD_SIZE   |  5            |                 |
-      | MD_END_OF_RECORD |  1            |                 |
-    And fixed-length record type "XYZ":
-      | field name       |  field length |
-      | MD_RECORD_TYPE   |  3            |
-      | MD_RECORD_SIZE   |  3            |
-      | MD_END_OF_RECORD |  1            |
-    And fixed-length record type "TXX_A" which applies for filenames matching "TXX_A":
-      | field name       |  field length | constraint |
-      | MD_RECORD_TYPE   |  3            | = TXX      |
-      | MD_FIELD_A       |  4            |            |
-      | MD_END_OF_RECORD |  1            |            |
-    And fixed-length record type "TXX_B" which applies for filenames matching "TXX_B":
-      | field name       |  field length | constraint |
-      | MD_RECORD_TYPE   |  3            | = TXX      |
-      | MD_FIELD_B       |  4            |            |
-      | MD_END_OF_RECORD |  1            |            |
+    Given the following configuration:
+    """
+		record_type("ABC") do
+		  field "RECORD_TYPE",   :length => 3, :constrained_to => "ABC"
+		  field "RECORD_SIZE",   :length => 5
+		  field "END_OF_RECORD", :length => 1
+		end
+
+		record_type("DEF") do
+		  field "RECORD_TYPE",   :length => 3, :constrained_to => "DEF"
+		  field "RECORD_SIZE",   :length => 5
+		  field "END_OF_RECORD", :length => 1
+		end
+		
+		record_type("GXX") do
+		  field "RECORD_TYPE",   :length => 3, :constrained_to => ["G01", "G02"]
+		  field "RECORD_SIZE",   :length => 5
+		  field "END_OF_RECORD", :length => 1
+		end
+
+		record_type("XYZ") do
+		  field "RECORD_TYPE",   :length => 3
+		  field "RECORD_SIZE",   :length => 3
+		  field "END_OF_RECORD", :length => 1
+		end
+		
+		record_type("TXX_A", :applies_for_filenames_matching => /TXX_A/) do
+		  field "RECORD_TYPE",   :length => 3, :constrained_to => "TXX"
+		  field "RECORD_SIZE",   :length => 4
+		  field "END_OF_RECORD", :length => 1
+		end
+
+		record_type("TXX_B", :applies_for_filenames_matching => /TXX_B/) do
+		  field "RECORD_TYPE",   :length => 3, :constrained_to => "TXX"
+		  field "RECORD_SIZE",   :length => 4
+		  field "END_OF_RECORD", :length => 1
+		end
+    """
   
   Scenario Outline: fixed length record recognition
     When record "<record>" coming from <filename> is analysed
