@@ -24,6 +24,10 @@ module AsciiDataTools
     end
     
     class NormalisationController < CatController
+      def self.from_command_line(command_line_arguments)
+        new(Configuration.new(command_line_arguments))
+      end
+      
       def run
         type_determiner = RecordType::TypeDeterminer.new(@configuration.record_types)
 

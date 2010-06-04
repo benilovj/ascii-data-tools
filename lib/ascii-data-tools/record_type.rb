@@ -6,7 +6,7 @@ module AsciiDataTools
       def able_to_decode?(ascii_string)
         ascii_string =~ regexp_for_matching_type
       end
-            
+
       def decode(ascii_string)
         Record::Record.new(self, split_into_values(ascii_string))
       end
@@ -29,9 +29,9 @@ module AsciiDataTools
     
     module Normaliser
       def normalise(encoded_record)
-        regexps_to_normalise_fields = make_regexps_to_normalise_fields
+        @regexps_to_normalise_fields ||= make_regexps_to_normalise_fields
         fields_to_normalise.inject(encoded_record) do |normalised_string, field|
-          normalised_string.gsub(regexps_to_normalise_fields[field], '\1' + 'X' * field.length + '\3' )
+          normalised_string.gsub(@regexps_to_normalise_fields[field], '\1' + 'X' * field.length + '\3' )
         end
       end
 
@@ -41,7 +41,7 @@ module AsciiDataTools
       end
 
       def fields_to_normalise
-        fields.select {|f| f.normalised?}
+        @fields_to_normalise ||= fields.select {|f| f.normalised?}
       end
 
       def make_normalising_regexp_for(field)
@@ -59,7 +59,6 @@ module AsciiDataTools
         ".{#{field.length}}"
       end
     end
-
     
     class Type
       include RecordDecoder

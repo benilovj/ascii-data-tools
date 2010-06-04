@@ -1,0 +1,13 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'ascii-data-tools'
+# require 'ruby-prof'
+
+# result = RubyProf.profile do
+AsciiDataTools::Controller::NormalisationController.from_command_line(ARGV).run
+# end 
+# file = File.open("profile.txt", "w")
+# printer = RubyProf::FlatPrinter.new(result)
+# printer.print(file, 0)
+
