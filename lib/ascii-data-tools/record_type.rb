@@ -27,8 +27,15 @@ module AsciiDataTools
       end
     end
     
+    module Normaliser
+      def normalise(encoded_record)
+        encoded_record
+      end
+    end
+    
     class Type
       include RecordDecoder
+      include Normaliser
       attr_reader :name
       
       def initialize(name, fields = [])

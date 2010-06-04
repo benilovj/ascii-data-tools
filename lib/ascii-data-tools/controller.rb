@@ -25,7 +25,12 @@ module AsciiDataTools
     
     class NormalisationController < CatController
       def run
-        pipeline = Record::TransformingPipeline.new {|encoded_record, filename| encoded_record}
+        type_determiner = RecordType::TypeDeterminer.new(@configuration.record_types)
+
+        pipeline = Record::TransformingPipeline.new do |encoded_record, filename|
+          type = type_determiner.determine_type_for(encoded_record, filename)
+          type.normalise(encoded_record)
+        end
         pipeline.stream(@configuration.input_source, @configuration.output_stream)
       end
     end
