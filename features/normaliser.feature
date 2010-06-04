@@ -4,15 +4,15 @@ Feature: normalisation
   I want a tool to normalise which outputs normalised raw records
   
   Background:
-	  Given the following configuration:
-		  """
-			record_type("ABC") do
-			  field "RECORD_TYPE",   :length => 3, :constrained_to => "ABC"
-			  field "RECORD_SIZE",   :length => 5
-			  field "TIMESTAMP",     :length => 14, :normalised => true
-			  field "END_OF_RECORD", :length => 1
-			end
-		  """	
+    Given the following configuration:
+      """
+      record_type("ABC") do
+        field "RECORD_TYPE",   :length => 3, :constrained_to => "ABC"
+        field "RECORD_SIZE",   :length => 5
+        field "TIMESTAMP",     :length => 14, :normalised => true
+        field "END_OF_RECORD", :length => 1
+      end
+      """
   
   Scenario: two fixed-length records
     Given a record stream containing
@@ -23,8 +23,8 @@ Feature: normalisation
       """
     When ascii-data-norm is invoked
     Then the following is printed out:
-	    """
-	    ABC12345XXXXXXXXXXXXXX
-	    ABC67890XXXXXXXXXXXXXX
+      """
+      ABC12345XXXXXXXXXXXXXX
+      ABC67890XXXXXXXXXXXXXX
     
-	    """
+      """

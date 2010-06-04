@@ -6,41 +6,41 @@ Feature: intelligent record recognition
   Background:
     Given the following configuration:
     """
-		record_type("ABC") do
-		  field "RECORD_TYPE",   :length => 3, :constrained_to => "ABC"
-		  field "RECORD_SIZE",   :length => 5
-		  field "END_OF_RECORD", :length => 1
-		end
+    record_type("ABC") do
+      field "RECORD_TYPE",   :length => 3, :constrained_to => "ABC"
+      field "RECORD_SIZE",   :length => 5
+      field "END_OF_RECORD", :length => 1
+    end
 
-		record_type("DEF") do
-		  field "RECORD_TYPE",   :length => 3, :constrained_to => "DEF"
-		  field "RECORD_SIZE",   :length => 5
-		  field "END_OF_RECORD", :length => 1
-		end
-		
-		record_type("GXX") do
-		  field "RECORD_TYPE",   :length => 3, :constrained_to => ["G01", "G02"]
-		  field "RECORD_SIZE",   :length => 5
-		  field "END_OF_RECORD", :length => 1
-		end
+    record_type("DEF") do
+      field "RECORD_TYPE",   :length => 3, :constrained_to => "DEF"
+      field "RECORD_SIZE",   :length => 5
+      field "END_OF_RECORD", :length => 1
+    end
+    
+    record_type("GXX") do
+      field "RECORD_TYPE",   :length => 3, :constrained_to => ["G01", "G02"]
+      field "RECORD_SIZE",   :length => 5
+      field "END_OF_RECORD", :length => 1
+    end
 
-		record_type("XYZ") do
-		  field "RECORD_TYPE",   :length => 3
-		  field "RECORD_SIZE",   :length => 3
-		  field "END_OF_RECORD", :length => 1
-		end
-		
-		record_type("TXX_A", :applies_for_filenames_matching => /TXX_A/) do
-		  field "RECORD_TYPE",   :length => 3, :constrained_to => "TXX"
-		  field "RECORD_SIZE",   :length => 4
-		  field "END_OF_RECORD", :length => 1
-		end
+    record_type("XYZ") do
+      field "RECORD_TYPE",   :length => 3
+      field "RECORD_SIZE",   :length => 3
+      field "END_OF_RECORD", :length => 1
+    end
+    
+    record_type("TXX_A", :applies_for_filenames_matching => /TXX_A/) do
+      field "RECORD_TYPE",   :length => 3, :constrained_to => "TXX"
+      field "RECORD_SIZE",   :length => 4
+      field "END_OF_RECORD", :length => 1
+    end
 
-		record_type("TXX_B", :applies_for_filenames_matching => /TXX_B/) do
-		  field "RECORD_TYPE",   :length => 3, :constrained_to => "TXX"
-		  field "RECORD_SIZE",   :length => 4
-		  field "END_OF_RECORD", :length => 1
-		end
+    record_type("TXX_B", :applies_for_filenames_matching => /TXX_B/) do
+      field "RECORD_TYPE",   :length => 3, :constrained_to => "TXX"
+      field "RECORD_SIZE",   :length => 4
+      field "END_OF_RECORD", :length => 1
+    end
     """
   
   Scenario Outline: fixed length record recognition

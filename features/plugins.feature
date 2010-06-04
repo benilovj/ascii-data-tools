@@ -11,18 +11,18 @@ Feature: tools for plugins
         field "A_NUMBER",         :length => 16, :constrained_to => /44123/
         field "END_OF_RECORD",    :length => 1
       end
-
-			record_type("ABC") do
-			  field "RECORD_TYPE",   :length => 3
-			  field "RECORD_SIZE",   :length => 5
-			  field "END_OF_RECORD", :length => 1
-			end
-
-			record_type("DEF") do
-			  field "RECORD_TYPE",   :length => 3
-			  field "RECORD_SIZE",   :length => 3
-			  field "END_OF_RECORD", :length => 1
-			end
+      
+      record_type("ABC") do
+        field "RECORD_TYPE",   :length => 3
+        field "RECORD_SIZE",   :length => 5
+        field "END_OF_RECORD", :length => 1
+      end
+      
+      record_type("DEF") do
+        field "RECORD_TYPE",   :length => 3
+        field "RECORD_SIZE",   :length => 3
+        field "END_OF_RECORD", :length => 1
+      end
       """
     When the record type configuration is printed
     Then it should look like this:
