@@ -5,7 +5,7 @@ require 'ascii-data-tools'
 # require 'ruby-prof'
 
 # result = RubyProf.profile do
-AsciiDataTools::Controller::CatController.new(ARGV).run
+AsciiDataTools::Controller::DiffController.new(ARGV).run
 # end
 # file = File.open("profile.txt", "w")
 # printer = RubyProf::FlatPrinter.new(result)

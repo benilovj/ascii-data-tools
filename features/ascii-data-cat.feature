@@ -14,13 +14,12 @@ Feature: ascii-data-cat support
       """
   
   Scenario: two fixed-length records
-    Given a record stream containing
+    When ascii-data-cat is invoked on a record stream containing
       """
       ABC12345
       ABC67890
       
       """
-    When ascii-data-cat is invoked
     Then the following is printed out:
       """
       Record 01 (ABC)
@@ -37,12 +36,11 @@ Feature: ascii-data-cat support
       """
 
   Scenario: an unknown record
-    Given a record stream containing
+    When ascii-data-cat is invoked on a record stream containing
       """
       XYZ123456789
 
       """    
-    When ascii-data-cat is invoked
     Then the following is printed out:
       """
       Record 01 (unknown)
@@ -61,12 +59,11 @@ Feature: ascii-data-cat support
         field "END_OF_RECORD", :length => 1
       end
       """
-    And file "records.ABC.gz" containing
+    When ascii-data-cat is invoked on a file "records.ABC.gz" containing
       """
       ABC123456
 
-      """    
-    When ascii-data-cat is invoked
+      """
     Then the following is printed out:
       """
       Record 01 (unknown)
@@ -76,14 +73,13 @@ Feature: ascii-data-cat support
       """
       
   Scenario: out-of-the-box example record types defined and configured
-    Given file "records.gz" containing
+    When ascii-data-cat is invoked on a file "records.gz" containing
       """
       EXAMPLE01MO 4912345678      442012345678    0012
       EXAMPLE02internet    07220156
       EXAMPLE01SMS4998765432      55555           0099
-      
+
       """
-    When ascii-data-cat is invoked
     Then the following is printed out:
       """
       Record 01 (EXAMPLE01)

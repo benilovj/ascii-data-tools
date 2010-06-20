@@ -17,17 +17,27 @@ end
 
 Given /^file "([^\"]*)" containing$/ do |filename, string|
   @record_source_filename = filename
-  Given "a record stream containing", string
+  @input_stream.string = string
 end
 
 When /^ascii-data-cat is invoked$/ do
   configuration = AsciiDataTools::Configuration.new(@command_line,
-    :input_source  => AsciiDataTools::InputSource.new(@record_source_filename, @input_stream),
+    :input_sources => [AsciiDataTools::InputSource.new(@record_source_filename, @input_stream)],
     :output_stream => @output_stream,
     :record_types  => @record_types
   )
 
   AsciiDataTools::Controller::CatController.new(configuration).run
+end
+
+When /^([^\"]*) is invoked on a file "([^\"]*)" containing$/ do |executable, filename, string|
+  Given "file \"#{filename}\" containing", string
+  When "#{executable} is invoked"
+end
+
+When /^([^\"]*) is invoked on a record stream containing$/ do |executable, string|
+  Given "a record stream containing", string
+  When "#{executable} is invoked"
 end
 
 Then /^the following is printed out:$/ do |string|

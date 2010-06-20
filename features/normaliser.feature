@@ -3,7 +3,7 @@ Feature: normalisation
   As a tester
   I want a tool to normalise which outputs normalised raw records
   
-  Background:
+  Scenario: two fixed-length records
     Given the following configuration:
       """
       record_type("ABC") do
@@ -13,15 +13,12 @@ Feature: normalisation
         field "END_OF_RECORD", :length => 1
       end
       """
-  
-  Scenario: two fixed-length records
-    Given a record stream containing
+    When ascii-data-norm is invoked on a record stream containing
       """
       ABC1234520100101120000
       ABC6789020100415180005
       
       """
-    When ascii-data-norm is invoked
     Then the following is printed out:
       """
       ABC12345XXXXXXXXXXXXXX

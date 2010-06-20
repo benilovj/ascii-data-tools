@@ -1,20 +1,23 @@
 require 'optparse'
 require 'zlib'
+require 'tempfile'
 
 module AsciiDataTools
   class Configuration
-    attr_reader :input_source, :output_stream, :errors, :record_types
+    attr_reader :input_sources, :output_stream, :errors, :record_types, :differ
     
     def initialize(arguments, overrides = {})
       @arguments = arguments
+      @overrides = overrides
       @errors = []
 
       @opts = define_optionparser_configuration
       remainder = parse(arguments)
 
       @output_stream = overrides[:output_stream] || STDOUT
-      @input_source = overrides[:input_source] || make_input_stream_from(remainder)
-      @record_types = overrides[:record_types] || load_record_types
+      @input_sources = overrides[:input_sources] || make_input_streams(remainder, overrides)
+      @record_types  = overrides[:record_types]  || load_record_types
+      @differ        = overrides[:differ]        || lambda {|filenames| Kernel.system "vimdiff #{filenames.join(' ')}"}
     end
     
     def valid?
@@ -29,9 +32,9 @@ module AsciiDataTools
     end
     
     protected
-    def make_input_stream_from(remainder)
+    def make_input_streams(remainder, overrides)
       begin
-        return InputSourceFactory.new(remainder).input_source
+        return InputSourceFactory.new(overrides).input_sources_from(remainder)
       rescue Exception => e
         @errors << e.message
         return nil
@@ -41,9 +44,10 @@ module AsciiDataTools
     def define_optionparser_configuration
       OptionParser.new do |opts|
         opts.banner = [
-          "Usage: ascii-data-cat [options] <input source>",
-          "An input source can be a flat file, a gzipped flat file or - (STDIN)",
-          "\n"].join("\n")
+          "Usage: #{File.basename($0)} [options] <input source>",
+          "An input source can be either a flat file or a gzipped flat file.",
+          @overrides[:input_pipe_accepted] ? "For this command, - (STDIN) is also allowed." : nil,
+          "\n"].compact.join("\n")
         
         opts.separator ""
         opts.separator "Other options:"
@@ -70,26 +74,63 @@ module AsciiDataTools
       AsciiDataTools.autodiscover
       AsciiDataTools.record_types
     end
-    
   end
   
   class InputSourceFactory
-    def initialize(input_arguments)
-      raise "No input specified." if input_arguments.empty?
-      raise "Two input sources detected: #{input_arguments.inspect}. Currently only one input source is supported." if input_arguments.length > 1
-      @input_argument = input_arguments.first
+    def initialize(properties = {})
+      @expected_argument_number = properties[:expected_argument_number] || 1
+      @input_pipe_accepted = properties[:input_pipe_accepted].nil? ? true : properties[:input_pipe_accepted]
     end
     
-    def input_source
-      return InputSource.new(nil, STDIN) if @input_argument == "-"
+    def input_sources_from(input_arguments)
+      validate_number_of input_arguments
+      return input_arguments.collect {|arg| make_input_source_from(arg)}
+    end
+    
+    protected
+    def validate_number_of(input_arguments)
+      raise "No input specified." if input_arguments.empty?
+      error_message = "#{input_arguments.size} input sources detected: #{input_arguments.inspect}. " +
+                      "This command accepts #{@expected_argument_number} input source(s)."
+      raise error_message if input_arguments.length != @expected_argument_number
+    end
+    
+    def make_input_source_from(input_argument)
+      if input_argument == "-"
+        if @input_pipe_accepted
+          return InputSource.new(nil, STDIN)
+        else
+          raise "STDIN not accepted for this command."
+        end
+      end
       
-      path_to_file = @input_argument
-      raise "File #{@input_argument} does not exist!" unless File.exists?(path_to_file)
+      path_to_file = input_argument
+      raise "File #{path_to_file} does not exist!" unless File.exists?(path_to_file)
       return InputSource.new(path_to_file, Zlib::GzipReader.open(path_to_file)) if path_to_file =~ /[.]gz$/
       return InputSource.new(path_to_file, File.open(path_to_file))
     end
-    
   end
   
   class InputSource < Struct.new(:filename, :stream); end
+  
+  class Editor
+    def initialize(&edit_command)
+      @tempfiles = {}
+      @edit_command = edit_command
+    end
+    
+    def [](n)
+      @tempfiles[n] ||= Tempfile.new("ascii_tools")
+    end
+    
+    def edit
+      @tempfiles.values.each {|f| f.close }
+      @edit_command[sorted_filenames]
+    end
+    
+    protected
+    def sorted_filenames
+      @tempfiles.sort.collect {|number, tempfile| tempfile.path}
+    end
+  end
 end

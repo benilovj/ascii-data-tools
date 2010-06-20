@@ -5,9 +5,9 @@ module AsciiDataTools
     it "should allow overwriting the input source and output stream" do
       input_source = mock("input source")
       output_stream = mock("output stream")
-      config = Configuration.new([], {:input_source => input_source, :output_stream => output_stream, :record_types => "record types"})
+      config = Configuration.new([], {:input_sources => [input_source], :output_stream => output_stream, :record_types => "record types"})
       config.output_stream.should == output_stream
-      config.input_source.should == input_source
+      config.input_sources.should == [input_source]
     end
     
     it "should not be valid unless the input stream is specified" do
@@ -51,33 +51,69 @@ module AsciiDataTools
   
   describe InputSourceFactory do
     it "should use STDIN as the stream when - is the input argument" do
-      InputSourceFactory.new(["-"]).input_source.stream.should == STDIN
+      source_from(["-"]).stream.should == STDIN
     end
     
     it "should raise an error if the path specified in the input argument does not exist" do
-      lambda { InputSourceFactory.new(["path/to/non-existent-file"]).input_source }.should raise_error(/does not exist/)
+      lambda { source_from(["path/to/non-existent-file"]) }.should raise_error(/does not exist/)
     end
     
     it "should raise an error if the input parameters are empty" do
-      lambda { InputSourceFactory.new([]).input_source }.should raise_error(/No input specified/)      
+      lambda { source_from([]) }.should raise_error(/No input specified/)      
     end
 
-    it "should raise an error if more than one input parameter is specified" do
-      lambda { InputSourceFactory.new(["x", "y"]).input_source }.should raise_error(/Two input sources detected/i)      
+    it "should raise an error if the wrong number of input parameters is specified" do
+      lambda { source_from(["x", "y"]) }.should raise_error(/2 input sources detected/i)      
+    end
+    
+    it "should process multiple input sources if so configured" do
+      File.stub!(:exists?).with("path/to/file1").and_return(true)
+      File.should_receive(:open).with("path/to/file1").and_return("IO stream 1")
+      File.stub!(:exists?).with("path/to/file2").and_return(true)
+      File.should_receive(:open).with("path/to/file2").and_return("IO stream 2")
+      
+      factory = InputSourceFactory.new(:expected_argument_number => 2)
+      sources = factory.input_sources_from ["path/to/file1", "path/to/file2"]
+      sources[0].stream.should == "IO stream 1"
+      sources[1].stream.should == "IO stream 2"      
+    end
+    
+    it "should reject the input pipe as an argument if so configured" do
+      lambda { InputSourceFactory.new(:input_pipe_accepted => false).input_sources_from(["-"]) }.should raise_error /STDIN/
     end
     
     it "should open the file normally if the path specified in the input argument exists and the file is not gzipped" do
       File.stub!(:exists?).with("path/to/file").and_return(true)
       File.should_receive(:open).with("path/to/file").and_return("IO stream")
       
-      InputSourceFactory.new(["path/to/file"]).input_source.stream.should == "IO stream"
+      source_from(["path/to/file"]).stream.should == "IO stream"
     end
     
     it "should open the file as a gzip read stream if the path specified in the input argument exists and the file is gzipped" do
       File.stub!(:exists?).with("path/to/file.gz").and_return(true)
       Zlib::GzipReader.should_receive(:open).with("path/to/file.gz").and_return("IO stream")
       
-      InputSourceFactory.new(["path/to/file.gz"]).input_source.stream.should == "IO stream"
+      source_from(["path/to/file.gz"]).stream.should == "IO stream"
+    end
+    
+    def source_from(args)
+      InputSourceFactory.new(:expected_argument_number => 1, :input_pipe_accepted => true).input_sources_from(args).first
+    end
+  end
+  
+  describe Editor do
+    it "should write input streams to files" do
+      result_aggregator = ""
+      editor = Editor.new do |filenames|
+        result_aggregator = filenames.inject(result_aggregator) {|agg, f| agg + File.read(f) }
+      end
+      editor[0] << "file1 "
+      editor[1] << "file2 "
+      editor[2] << "file3"
+      
+      editor.edit
+      
+      result_aggregator.should == "file1 file2 file3"
     end
   end
 end
