@@ -56,17 +56,10 @@ module AsciiDataTools
       def run
         differ = Editor.new(&@configuration.differ)
         @configuration.input_sources.each_with_index do |input_source, i|
-          normed_tempfile = Tempfile.new("norm")
-          NormalisationController.new(:input_sources => [input_source],
-                                      :output_stream => normed_tempfile,
-                                      :record_types  => @configuration.record_types).run
-          
+          normed_tempfile = normalise(input_source)
           sorted_tempfile = sort(normed_tempfile)
+          cat(InputSource.new(input_source.filename, sorted_tempfile), differ[i])
           normed_tempfile.delete
-          
-          CatController.new(:input_sources => [InputSource.new(input_source.filename, sorted_tempfile)],
-                            :output_stream => differ[i],
-                            :record_types  => @configuration.record_types).run
           sorted_tempfile.delete
         end
         differ.edit
@@ -79,6 +72,14 @@ module AsciiDataTools
          :differ => lambda {|filenames| Kernel.system "vimdiff #{filenames.join(' ')}"} }
       end
       
+      def normalise(input_source)
+        normed_tempfile = Tempfile.new("norm")
+        NormalisationController.new(:input_sources => [input_source],
+                                    :output_stream => normed_tempfile,
+                                    :record_types  => @configuration.record_types).run
+        normed_tempfile
+      end
+      
       def sort(tempfile)
         tempfile.close
         
@@ -88,6 +89,12 @@ module AsciiDataTools
         Kernel.system("sort #{tempfile.path} > #{sorted_tempfile.path}")
         sorted_tempfile.open
         sorted_tempfile
+      end
+      
+      def cat(input_source, output_stream)
+        CatController.new(:input_sources => [input_source],
+                          :output_stream => output_stream,
+                          :record_types  => @configuration.record_types).run
       end
     end
   end
