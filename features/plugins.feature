@@ -33,7 +33,7 @@ Feature: tools for plugins
       | DEF       | 7            |                                          |
       | ABC       | 9            |                                          |
       | XYZ       | 22           | RECORD_TYPE = REC01, A_NUMBER =~ /44123/ |
-      | EXAMPLE02 | 30           | RECORD_TYPE = EXAMPLE02                  |
+      | EXAMPLE02 | 44           | RECORD_TYPE = EXAMPLE02                  |
       | EXAMPLE01 | 49           | RECORD_TYPE = EXAMPLE01                  |
       +-----------+--------------+------------------------------------------+
 

@@ -21,13 +21,11 @@ Given /^file "([^\"]*)" containing$/ do |filename, string|
 end
 
 When /^ascii-data-cat is invoked$/ do
-  configuration = AsciiDataTools::Configuration.new(@command_line,
+  AsciiDataTools::Controller::CatController.new(
     :input_sources => [AsciiDataTools::InputSource.new(@record_source_filename, @input_stream)],
     :output_stream => @output_stream,
     :record_types  => @record_types
-  )
-
-  AsciiDataTools::Controller::CatController.new(configuration).run
+  ).run
 end
 
 When /^([^\"]*) is invoked on a file "([^\"]*)" containing$/ do |executable, filename, string|

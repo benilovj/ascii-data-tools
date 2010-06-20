@@ -1,13 +1,13 @@
-Feature: ascii-data-diff support
+Feature: ascii-data-qdiff support
   In order to see the difference between the contents of ascii-encoded record streams
   As a tester
-  I want a tool to decode, pretty print the streams and show them in a diffing editor
+  I want a tool to decode, normalise, sort, pretty print the streams and show them in a diffing editor
   
   Scenario: normal execution
-    When ascii-data-diff is invoked on files containing:
+    When ascii-data-qdiff is invoked on files containing:
       """
       EXAMPLE01MO 1112345678      442012345678    0012\n  ||  EXAMPLE01MO 9954321098      442012345678    0012\n
-      EXAMPLE02internet    07220156\n                     ||  EXAMPLE02internet    07220156\n
+      EXAMPLE02internet    2010010112000007220156\n       ||  EXAMPLE02internet    2010010112000007220156\n
       EXAMPLE01SMS4998765432      55555           0099\n  ||  --------------------------------------------------
       """
     Then the diffed result should be:
@@ -15,19 +15,12 @@ Feature: ascii-data-diff support
       Record 01 (EXAMPLE01)                          ||  Record 01 (EXAMPLE01)
       01 RECORD_TYPE      : [EXAMPLE01]------------  ||  01 RECORD_TYPE      : [EXAMPLE01]------------
       02 USAGE            : [MO ]------------------  ||  02 USAGE            : [MO ]------------------
-      03 A_NUMBER         : [1112345678      ]-----  ||  03 A_NUMBER         : [9954321098      ]-----                                        
+      03 A_NUMBER         : [1112345678      ]-----  ||  03 A_NUMBER         : [9954321098      ]-----
       04 B_NUMBER         : [442012345678    ]-----  ||  04 B_NUMBER         : [442012345678    ]-----
       05 CHARGEABLE_UNITS : [0012]-----------------  ||  05 CHARGEABLE_UNITS : [0012]-----------------
       06 END_OF_RECORD    : [\n]-------------------  ||  06 END_OF_RECORD    : [\n]-------------------
                                                      ||  
-      Record 02 (EXAMPLE02)                          ||  Record 02 (EXAMPLE02)
-      01 RECORD_TYPE      : [EXAMPLE02]--------      ||  01 RECORD_TYPE      : [EXAMPLE02]--------
-      02 APN              : [internet    ]-----      ||  02 APN              : [internet    ]-----
-      03 SESSION_DURATION : [0722]-------------      ||  03 SESSION_DURATION : [0722]-------------
-      04 CHARGEABLE_UNITS : [0156]-------------      ||  04 CHARGEABLE_UNITS : [0156]-------------
-      05 END_OF_RECORD    : [\n]---------------      ||  05 END_OF_RECORD    : [\n]---------------
-                                                     ||  
-      Record 03 (EXAMPLE01)                          ||  -----------------------------------------------
+      Record 02 (EXAMPLE01)                          ||  -----------------------------------------------
       01 RECORD_TYPE      : [EXAMPLE01]------------  ||  -----------------------------------------------
       02 USAGE            : [SMS]------------------  ||  -----------------------------------------------
       03 A_NUMBER         : [4998765432      ]-----  ||  -----------------------------------------------
@@ -35,5 +28,13 @@ Feature: ascii-data-diff support
       05 CHARGEABLE_UNITS : [0099]-----------------  ||  -----------------------------------------------
       06 END_OF_RECORD    : [\n]-------------------  ||  -----------------------------------------------
                                                      ||  -----------------------------------------------
+      Record 03 (EXAMPLE02)                          ||  Record 02 (EXAMPLE02)
+      01 RECORD_TYPE      : [EXAMPLE02]----------    ||  01 RECORD_TYPE      : [EXAMPLE02]----------
+      02 APN              : [internet    ]-------    ||  02 APN              : [internet    ]-------
+      03 TIMESTAMP        : [XXXXXXXXXXXXXX]-----    ||  03 TIMESTAMP        : [XXXXXXXXXXXXXX]-----
+      04 SESSION_DURATION : [0722]---------------    ||  04 SESSION_DURATION : [0722]---------------
+      05 CHARGEABLE_UNITS : [0156]---------------    ||  05 CHARGEABLE_UNITS : [0156]---------------
+      06 END_OF_RECORD    : [\n]-----------------    ||  06 END_OF_RECORD    : [\n]-----------------
+                                                     ||  
       
       """

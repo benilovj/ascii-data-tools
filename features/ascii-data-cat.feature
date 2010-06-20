@@ -76,7 +76,7 @@ Feature: ascii-data-cat support
     When ascii-data-cat is invoked on a file "records.gz" containing
       """
       EXAMPLE01MO 4912345678      442012345678    0012
-      EXAMPLE02internet    07220156
+      EXAMPLE02internet    2010010112000007220156
       EXAMPLE01SMS4998765432      55555           0099
 
       """
@@ -91,11 +91,12 @@ Feature: ascii-data-cat support
       06 END_OF_RECORD    : [\n]-------------------
 
       Record 02 (EXAMPLE02)
-      01 RECORD_TYPE      : [EXAMPLE02]--------
-      02 APN              : [internet    ]-----
-      03 SESSION_DURATION : [0722]-------------
-      04 CHARGEABLE_UNITS : [0156]-------------
-      05 END_OF_RECORD    : [\n]---------------
+      01 RECORD_TYPE      : [EXAMPLE02]----------
+      02 APN              : [internet    ]-------
+      03 TIMESTAMP        : [20100101120000]-----
+      04 SESSION_DURATION : [0722]---------------
+      05 CHARGEABLE_UNITS : [0156]---------------
+      06 END_OF_RECORD    : [\n]-----------------
 
       Record 03 (EXAMPLE01)
       01 RECORD_TYPE      : [EXAMPLE01]------------

@@ -11,14 +11,14 @@ Given /^streams containing$/ do |text|
   @input_stream2.rewind
 end
 
-When /^ascii\-data\-diff is invoked on files containing:$/ do |string|
+When /^ascii\-data\-qdiff is invoked on files containing:$/ do |string|
   Given "streams containing", string
-  When "ascii-data-diff is invoked"
+  When "ascii-data-qdiff is invoked"
 end
 
-When /^ascii\-data\-diff is invoked$/ do
+When /^ascii\-data\-qdiff is invoked$/ do
   @actual_output1 = @actual_output2 = nil
-  configuration = AsciiDataTools::Configuration.new(@command_line,
+  AsciiDataTools::Controller::DiffController.new(
     :input_sources  => [AsciiDataTools::InputSource.new(nil, @input_stream1),
                         AsciiDataTools::InputSource.new(nil, @input_stream2)],
     :differ         => lambda do |filenames|
@@ -26,9 +26,7 @@ When /^ascii\-data\-diff is invoked$/ do
                          @actual_output2 = File.read(filenames.last)
                        end,
     :record_types   => @record_types
-  )
-
-  AsciiDataTools::Controller::DiffController.new(configuration).run
+  ).run
 end
 
 Then /^the diffed result should be:$/ do |text|

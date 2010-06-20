@@ -1,10 +1,15 @@
+require 'tempfile'
+
 module AsciiDataTools
   module Controller
     class AbstractController
       def initialize(configuration_or_command_line_arguments)
-        if configuration_or_command_line_arguments.is_a?(Enumerable)
+        case configuration_or_command_line_arguments
+        when Hash then
+          @configuration = Configuration.new([], defaults.merge(configuration_or_command_line_arguments))
+        when Array then
           @configuration = Configuration.new(configuration_or_command_line_arguments, defaults)
-        else
+        when Configuration then
           @configuration = configuration_or_command_line_arguments
         end
         @configuration.error_info_with_usage unless @configuration.valid?
@@ -50,18 +55,39 @@ module AsciiDataTools
     class DiffController < AbstractController
       def run
         differ = Editor.new(&@configuration.differ)
-        @configuration.input_sources.each_with_index do |input_source, n|
-          config = Configuration.new([], :input_sources => [input_source],
-                                         :output_stream => differ[n],
-                                         :record_types  => @configuration.record_types)
-          CatController.new(config).run
+        @configuration.input_sources.each_with_index do |input_source, i|
+          normed_tempfile = Tempfile.new("norm")
+          NormalisationController.new(:input_sources => [input_source],
+                                      :output_stream => normed_tempfile,
+                                      :record_types  => @configuration.record_types).run
+          
+          sorted_tempfile = sort(normed_tempfile)
+          normed_tempfile.delete
+          
+          CatController.new(:input_sources => [InputSource.new(input_source.filename, sorted_tempfile)],
+                            :output_stream => differ[i],
+                            :record_types  => @configuration.record_types).run
+          sorted_tempfile.delete
         end
         differ.edit
       end
       
       protected
       def defaults
-        {:expected_argument_number => 2, :input_pipe_accepted => false}
+        {:expected_argument_number => 2,
+         :input_pipe_accepted => false,
+         :differ => lambda {|filenames| Kernel.system "vimdiff #{filenames.join(' ')}"} }
+      end
+      
+      def sort(tempfile)
+        tempfile.close
+        
+        sorted_tempfile = Tempfile.new("sort")
+        sorted_tempfile.close
+        
+        Kernel.system("sort #{tempfile.path} > #{sorted_tempfile.path}")
+        sorted_tempfile.open
+        sorted_tempfile
       end
     end
   end

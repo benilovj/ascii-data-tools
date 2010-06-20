@@ -11,6 +11,7 @@ AsciiDataTools.configure do
   record_type("EXAMPLE02") do
     field "RECORD_TYPE",      :length => 9, :constrained_to => "EXAMPLE02"
     field "APN",              :length => 12
+    field "TIMESTAMP",        :length => 14, :normalised => true
     field "SESSION_DURATION", :length => 4
     field "CHARGEABLE_UNITS", :length => 4
     field "END_OF_RECORD",    :length => 1

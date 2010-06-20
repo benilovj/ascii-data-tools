@@ -17,7 +17,7 @@ module AsciiDataTools
       @output_stream = overrides[:output_stream] || STDOUT
       @input_sources = overrides[:input_sources] || make_input_streams(remainder, overrides)
       @record_types  = overrides[:record_types]  || load_record_types
-      @differ        = overrides[:differ]        || lambda {|filenames| Kernel.system "vimdiff #{filenames.join(' ')}"}
+      @differ        = overrides[:differ]
     end
     
     def valid?
