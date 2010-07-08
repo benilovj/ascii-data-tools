@@ -18,13 +18,14 @@ end
 
 When /^ascii\-data\-qdiff is invoked$/ do
   @actual_output1 = @actual_output2 = nil
-  AsciiDataTools::Controller::DiffController.new(
+  AsciiDataTools::Controller::QDiffController.new(
     :input_sources  => [AsciiDataTools::InputSource.new(nil, @input_stream1),
                         AsciiDataTools::InputSource.new(nil, @input_stream2)],
-    :differ         => lambda do |filenames|
+    :editor         => lambda do |filenames|
                          @actual_output1 = File.read(filenames.first)
                          @actual_output2 = File.read(filenames.last)
                        end,
+    :output_stream  => @output_stream,
     :record_types   => @record_types
   ).run
 end

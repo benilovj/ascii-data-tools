@@ -4,7 +4,7 @@ require 'tempfile'
 
 module AsciiDataTools
   class Configuration
-    attr_reader :input_sources, :output_stream, :errors, :record_types, :differ
+    attr_reader :input_sources, :output_stream, :errors, :record_types, :editor
     
     def initialize(arguments, overrides = {})
       @arguments = arguments
@@ -17,7 +17,7 @@ module AsciiDataTools
       @output_stream = overrides[:output_stream] || STDOUT
       @input_sources = overrides[:input_sources] || make_input_streams(remainder, overrides)
       @record_types  = overrides[:record_types]  || load_record_types
-      @differ        = overrides[:differ]
+      @editor        = overrides[:editor]
     end
     
     def valid?
@@ -111,7 +111,15 @@ module AsciiDataTools
     end
   end
   
-  class InputSource < Struct.new(:filename, :stream); end
+  class InputSource < Struct.new(:filename, :stream)
+    def read
+      stream.readline
+    end
+    
+    def has_records?
+      not stream.eof?
+    end
+  end
   
   class Editor
     def initialize(&edit_command)

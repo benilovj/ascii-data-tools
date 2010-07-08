@@ -1,4 +1,5 @@
 require File.join(File.dirname(__FILE__), '..', 'spec_helper')
+require 'stringio'
 
 module AsciiDataTools
   describe Configuration do
@@ -114,6 +115,17 @@ module AsciiDataTools
       editor.edit
       
       result_aggregator.should == "file1 file2 file3"
+    end
+  end
+  
+  describe InputSource do
+    it "should read a line from the input stream when prompted to read and should know when it's full or empty" do
+      source = InputSource.new("some file", StringIO.new("abc\ndef\n"))
+      
+      source.should have_records
+      source.read.should == "abc\n"
+      source.read.should == "def\n"
+      source.should_not have_records
     end
   end
 end

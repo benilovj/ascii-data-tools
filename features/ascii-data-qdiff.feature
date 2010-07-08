@@ -3,6 +3,17 @@ Feature: ascii-data-qdiff support
   As a tester
   I want a tool to decode, normalise, sort, pretty print the streams and show them in a diffing editor
   
+  Scenario: comparing identical files
+    When ascii-data-qdiff is invoked on files containing:
+      """
+      EXAMPLE01MO 1112345678      442012345678    0012\n  ||  EXAMPLE01MO 1112345678      442012345678    0012\n
+      EXAMPLE01SMS4998765432      55555           0099\n  ||  --------------------------------------------------
+      """
+    Then the following is printed out:
+      """
+      The files are identical.
+      """
+
   Scenario: normal execution
     When ascii-data-qdiff is invoked on files containing:
       """
