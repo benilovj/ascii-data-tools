@@ -29,19 +29,6 @@ module AsciiDataTools
       end
     end
     
-    # class CatController < AbstractController
-    #   def run
-    #     formatter = Formatting::Formatter.new
-    #     
-    #     pipeline = Record::TransformingPipeline.new do |encoded_record, filename|
-    #       type = type_determiner.determine_type_for(encoded_record, filename)
-    #       decoded_record = type.decode(encoded_record)
-    #       formatter.format(decoded_record)
-    #     end
-    #     pipeline.stream(@configuration.input_sources.first, @configuration.output_stream)
-    #   end
-    # end
-    
     class FormattingFilter < Record::Filter
       def initialize(filename, type_determiner)
         @formatter = Formatting::Formatter.new
