@@ -39,17 +39,5 @@ module AsciiDataTools
         @editor[1].should be_empty
       end
     end
-    
-    describe SortingFilter do
-      it "should sort the given stream" do
-        filter = SortingFilter.new
-        filter << InputSource.new("some file", StringIO.new("xyz\nabc\ndef\n"))
-        output = StringIO.new
-        
-        filter.write(output)
-
-        output.string.should == "abc\ndef\nxyz\n"
-      end
-    end
   end
 end
