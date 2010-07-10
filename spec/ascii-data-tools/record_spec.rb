@@ -24,17 +24,5 @@ module AsciiDataTools
         lambda {Record.new(mock(AsciiDataTools::RecordType::Type, :field_names => ["existing"]), ["xyz"])['non-existing'] }.should raise_error(/non-existing.*does not exist/)
       end
     end
-    
-    describe TransformingPipeline do
-      it "should read input records, transform them and write them to the output" do
-        input_source = AsciiDataTools::InputSource.new("filename", StringIO.new("abc\ndef\n"))
-        output = StringIO.new        
-        pipeline = TransformingPipeline.new {|record, filename| "#{filename}:#{record.strip.reverse}\n"}
-
-        pipeline.stream(input_source, output)
-
-        output.string.should == "filename:cba\nfilename:fed\n"
-      end
-    end
   end
 end

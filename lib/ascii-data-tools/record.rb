@@ -29,21 +29,5 @@ module AsciiDataTools
         @type.field_names.zip(@values)
       end
     end
-    
-    class TransformingPipeline
-      def initialize(&block)
-        @transformer_block = block
-      end
-      
-      def stream(record_source, output_stream)
-        until record_source.stream.eof?
-          original_record = record_source.stream.readline
-          transformed_record = @transformer_block[original_record, record_source.filename]
-          output_stream << transformed_record
-        end
-        output_stream.flush
-        output_stream.close
-      end
-    end
   end
 end
