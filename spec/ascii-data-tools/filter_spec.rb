@@ -6,7 +6,7 @@ require 'stringio'
 
 Spec::Matchers.define :output do |expected_output|
   chain :from_upstream do |*filters|
-    @filters = filters.map {|filter| filter.is_a?(String) ? AsciiDataTools::InputSource.new("some file", StringIO.new(filter)) : filter }
+    @filters = filters.map {|filter| filter.is_a?(String) ? input_source_containing(filter) : filter }
   end
 
   match do |filter|
@@ -23,6 +23,10 @@ Spec::Matchers.define :output do |expected_output|
   failure_message_for_should do |filter|
     "filter should output #{expected_output.inspect} but instead outputs #{@actual_string.inspect}"
   end
+end
+
+def input_source_containing(content)
+  AsciiDataTools::InputSource.new("some file", StringIO.new(content))
 end
 
 module AsciiDataTools
@@ -72,7 +76,17 @@ module AsciiDataTools
     
     describe SortingFilter do
       it "should sort the given stream" do
-        SortingFilter.new.should output("abc\ndef\nxyz\n").from_upstream("xyz\nabc\ndef\n")
+        should output("abc\ndef\nxyz\n").from_upstream("xyz\nabc\ndef\n")
+      end
+    end
+    
+    describe DiffingFilter do
+      it "should return an empty result if the inputs are the same" do
+        should output("").from_upstream([input_source_containing("abc\ndef\nxyz\n"), input_source_containing("abc\ndef\nxyz\n")])
+      end
+      
+      it "should return the diff if the inputs are not the same" do
+        should output("2a3\n> xyz\n").from_upstream([input_source_containing("abc\ndef\n"), input_source_containing("abc\ndef\nxyz\n")])
       end
     end
   end

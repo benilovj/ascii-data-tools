@@ -7,26 +7,30 @@ module AsciiDataTools
         @filter_block = block
       end
       
-      def <<(upstream)
-        @upstream = upstream
-        upstream
+      def <<(upstream_filter)
+        @upstream = upstream_filter
+        upstream_filter
       end
       
       def read
-        filter(@upstream.read)
+        filter(upstream.read)
       end
       
       def write(output_stream)
-        output_stream << read while @upstream.has_records?
+        output_stream << read while has_records?
       end
       
       def has_records?
-        @upstream.has_records?
+        upstream.has_records?
       end
       
       protected
       def filter(record)
         @filter_block[record]
+      end
+      
+      def upstream
+        @upstream
       end
     end
     
@@ -36,23 +40,27 @@ module AsciiDataTools
         @filter_all_block = block
       end
       
-      def read
-        if @first_time
-          tempfile = buffer_upstream_as_tempfile
-          @upstream = InputSource.new(nil, filter_all(tempfile))
-          @first_time = false
-        end
-        @upstream.read
-      end
-      
       protected
       def filter_all(tempfile)
         @filter_all_block[tempfile]
       end
       
-      def buffer_upstream_as_tempfile
+      def filter(record)
+        record
+      end
+      
+      def upstream
+        if @first_time
+          tempfile = buffer_as_tempfile(@upstream)
+          @upstream = InputSource.new(nil, filter_all(tempfile))
+          @first_time = false
+        end
+        @upstream
+      end
+      
+      def buffer_as_tempfile(stream)
         tempfile = Tempfile.new("filter")
-        tempfile << @upstream.read while @upstream.has_records?
+        tempfile << stream.read while stream.has_records?
         tempfile.open
       end
     end
@@ -92,6 +100,26 @@ module AsciiDataTools
         
         Kernel.system("sort #{tempfile.path} > #{sorted_tempfile.path}")
         sorted_tempfile.open
+      end
+    end
+    
+    class DiffingFilter < BufferingFilter
+      def initialize
+        super(&proc {|tempfiles| IO.popen(diff_command_for(tempfiles)) })
+      end
+            
+      protected
+      def diff_command_for(tempfiles)
+        "diff #{tempfiles.collect {|t| t.path}.join(' ')}"
+      end
+      
+      def upstream
+        if @first_time
+          tempfiles = @upstream.collect {|stream| buffer_as_tempfile(stream)}
+          @upstream = InputSource.new(nil, filter_all(tempfiles))
+          @first_time = false
+        end
+        @upstream
       end
     end
   end

@@ -49,22 +49,6 @@ module AsciiDataTools
       end
     end
     
-    class DiffController < AbstractController
-      def run
-        @configuration.output_stream << "Identical streams." if input_stream.eof?
-      end
-      
-      protected
-      def input_stream
-        @configuration.input_sources.first.stream
-      end
-      
-      def defaults
-        {:expected_argument_number => 2,
-         :input_pipe_accepted => false}
-      end
-    end
-    
     class QDiffController < AbstractController
       def run
         editor = Editor.new(&@configuration.editor)
