@@ -105,7 +105,11 @@ module AsciiDataTools
     
     class DiffingFilter < BufferingFilter
       def initialize
-        super(&proc {|tempfiles| IO.popen(diff_command_for(tempfiles)) })
+        super do |tempfiles|
+          stream = IO.popen(diff_command_for(tempfiles))
+          raise StreamsEqualException.new if stream.eof?
+          stream
+        end
       end
             
       protected
@@ -120,6 +124,12 @@ module AsciiDataTools
           @first_time = false
         end
         @upstream
+      end
+    end
+    
+    class StreamsEqualException < Exception
+      def initialize
+        super("The streams are equal")
       end
     end
   end

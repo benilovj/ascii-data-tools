@@ -81,12 +81,14 @@ module AsciiDataTools
     end
     
     describe DiffingFilter do
-      it "should return an empty result if the inputs are the same" do
-        should output("").from_upstream([input_source_containing("abc\ndef\nxyz\n"), input_source_containing("abc\ndef\nxyz\n")])
-      end
-      
       it "should return the diff if the inputs are not the same" do
         should output("2a3\n> xyz\n").from_upstream([input_source_containing("abc\ndef\n"), input_source_containing("abc\ndef\nxyz\n")])
+      end
+      
+      it "should raise an exception when the streams are the same" do
+        filter = DiffingFilter.new
+        filter << [input_source_containing("abc\ndef\n"), input_source_containing("abc\ndef\n")]
+        lambda { filter.write(StringIO.new) }.should raise_error(StreamsEqualException)
       end
     end
   end
