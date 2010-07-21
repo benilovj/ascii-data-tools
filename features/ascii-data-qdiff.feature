@@ -11,6 +11,7 @@ Feature: ascii-data-qdiff support
     Then the following is printed out:
       """
       The files are identical.
+      
       """
 
   Scenario: normal execution
@@ -22,7 +23,7 @@ Feature: ascii-data-qdiff support
       """
     Then the diffed result should be:
       """
-      Record 01 (EXAMPLE01)                          ||  Record 01 (EXAMPLE01)
+      Record (EXAMPLE01)                             ||  Record (EXAMPLE01)
       01 RECORD_TYPE      : [EXAMPLE01]------------  ||  01 RECORD_TYPE      : [EXAMPLE01]------------
       02 USAGE            : [MO ]------------------  ||  02 USAGE            : [MO ]------------------
       03 A_NUMBER         : [1112345678      ]-----  ||  03 A_NUMBER         : [9954321098      ]-----
@@ -30,7 +31,9 @@ Feature: ascii-data-qdiff support
       05 CHARGEABLE_UNITS : [0012]-----------------  ||  05 CHARGEABLE_UNITS : [0012]-----------------
       06 END_OF_RECORD    : [\n]-------------------  ||  06 END_OF_RECORD    : [\n]-------------------
                                                      ||  
-      Record 02 (EXAMPLE01)                          ||  -----------------------------------------------
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~||  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                                     ||  
+      Record (EXAMPLE01)                             ||  -----------------------------------------------
       01 RECORD_TYPE      : [EXAMPLE01]------------  ||  -----------------------------------------------
       02 USAGE            : [SMS]------------------  ||  -----------------------------------------------
       03 A_NUMBER         : [4998765432      ]-----  ||  -----------------------------------------------
@@ -38,13 +41,4 @@ Feature: ascii-data-qdiff support
       05 CHARGEABLE_UNITS : [0099]-----------------  ||  -----------------------------------------------
       06 END_OF_RECORD    : [\n]-------------------  ||  -----------------------------------------------
                                                      ||  -----------------------------------------------
-      Record 03 (EXAMPLE02)                          ||  Record 02 (EXAMPLE02)
-      01 RECORD_TYPE      : [EXAMPLE02]----------    ||  01 RECORD_TYPE      : [EXAMPLE02]----------
-      02 APN              : [internet    ]-------    ||  02 APN              : [internet    ]-------
-      03 TIMESTAMP        : [XXXXXXXXXXXXXX]-----    ||  03 TIMESTAMP        : [XXXXXXXXXXXXXX]-----
-      04 SESSION_DURATION : [0722]---------------    ||  04 SESSION_DURATION : [0722]---------------
-      05 CHARGEABLE_UNITS : [0156]---------------    ||  05 CHARGEABLE_UNITS : [0156]---------------
-      06 END_OF_RECORD    : [\n]-----------------    ||  06 END_OF_RECORD    : [\n]-----------------
-                                                     ||  
-      
       """
