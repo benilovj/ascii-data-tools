@@ -8,6 +8,14 @@ Record 01 (ABC)
 
 STR
 
+EXPECTED_FORMATTING_OF_UNNUMBERED_FIXED_LENGTH_RECORD = <<STR
+Record (ABC)
+01 field1  : [12345]-----
+02 field10 : [abc]-------
+03 field3  : [\\n]--------
+
+STR
+
 include RecordTypeHelpers
 
 def fixed_length_type
@@ -32,6 +40,14 @@ module AsciiDataTools
       it "should format a record" do
         record = AsciiDataTools::Record::Record.new(fixed_length_type, ["12345", "abc", "\n"])
         TypeTemplate.new(fixed_length_type).format(1, record).should == EXPECTED_FORMATTING_OF_FIXED_LENGTH_RECORD
+      end
+    end
+    
+    describe UnnumberedTypeTemplate do
+      include RecordTypeHelpers
+      it "should format a record" do
+        record = AsciiDataTools::Record::Record.new(fixed_length_type, ["12345", "abc", "\n"])
+        UnnumberedTypeTemplate.new(fixed_length_type).format(1, record).should == EXPECTED_FORMATTING_OF_UNNUMBERED_FIXED_LENGTH_RECORD
       end
     end
   end

@@ -17,7 +17,11 @@ module AsciiDataTools
       end
       
       def type_template_for(record_type)
-        @type_templates[record_type] ||= TypeTemplate.new(record_type)
+        @type_templates[record_type] ||= make_type_template_for(record_type)
+      end
+      
+      def make_type_template_for(record_type)
+        TypeTemplate.new(record_type)
       end
     end
     
@@ -57,6 +61,13 @@ module AsciiDataTools
         length_of_longest_field_string = field_strings.max_by {|s| s.length}.length
         number_of_dashes = [length_of_longest_field_string + MINIMUM_NUMBER_OF_DASHES, LENGTH_LIMIT_OF_PADDED_LINE].min
         field_strings.collect {|field_string| field_string.ljust(number_of_dashes, "-") }
+      end
+    end
+    
+    class UnnumberedTypeTemplate < TypeTemplate
+      protected
+      def header_template
+        @header_template ||= "Record (#{@type.name})"
       end
     end
     

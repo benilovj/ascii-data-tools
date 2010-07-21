@@ -49,29 +49,6 @@ module AsciiDataTools
       end
     end
     
-    # class QDiffController < AbstractController
-    #   def run
-    #     editor = Editor.new(&@configuration.editor)
-    #     @configuration.input_sources.each_with_index do |input_source, i|
-    #       normalising_filter = Filter::NormalisingFilter.new(input_source.filename, type_determiner)
-    #       sorting_filter     = Filter::SortingFilter.new
-    #       formatting_filter  = Filter::FormattingFilter.new(input_source.filename, type_determiner)
-    #       
-    #       formatting_filter << sorting_filter << normalising_filter << input_source
-    # 
-    #       formatting_filter.write(editor[i])
-    #     end
-    #     editor.edit
-    #   end
-    #   
-    #   protected
-    #   def defaults
-    #     {:expected_argument_number => 2,
-    #      :input_pipe_accepted => false,
-    #      :editor => lambda {|filenames| Kernel.system "vimdiff #{filenames.join(' ')}"} }
-    #   end
-    # end
-    
     class QDiffController < AbstractController
       def run
         editor = Editor.new(&@configuration.editor)
@@ -82,7 +59,7 @@ module AsciiDataTools
         sorter2        = Filter::SortingFilter.new
         diff_executer  = Filter::DiffExecutingFilter.new
         diff_parser    = Filter::DiffParsingFilter.new
-        diff_formatter = Filter::DiffFormattingFilter.new
+        diff_formatter = Filter::DiffFormattingFilter.new(type_determiner)
         
         diff_formatter << diff_parser << diff_executer << [sorter1 << normaliser1 << @configuration.input_sources[0],
                                                            sorter2 << normaliser2 << @configuration.input_sources[1]]

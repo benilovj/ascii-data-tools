@@ -103,15 +103,25 @@ module AsciiDataTools
       end
     end
     
-    class DiffFormattingFilter < Filter
-      DIFF_DELIMITER = "\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
+    class DiffFormattingFilter < FormattingFilter
+      DIFF_DELIMITER = "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n"
+      
+      def initialize(type_determiner)
+        super(nil, type_determiner)
+        def @formatter.make_type_template_for(record_type)
+          Formatting::UnnumberedTypeTemplate.new(record_type)
+        end
+      end
       
       def write(*streams)
-        upstream.read
         while upstream.has_records?
-          streams[0] << DIFF_DELIMITER
-          streams[1] << DIFF_DELIMITER
-          upstream.read
+          difference = upstream.read
+          difference.left_contents.each {|rec| streams[0] << filter(rec)}
+          difference.right_contents.each {|rec| streams[1] << filter(rec)}
+          if upstream.has_records?
+            streams[0] << DIFF_DELIMITER
+            streams[1] << DIFF_DELIMITER
+          end
         end
       end
     end
