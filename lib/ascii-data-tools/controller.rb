@@ -1,4 +1,5 @@
 require 'ascii-data-tools/filter'
+require 'lib/ascii-data-tools/external_programs'
 
 module AsciiDataTools
   module Controller
@@ -50,6 +51,8 @@ module AsciiDataTools
     end
     
     class QDiffController < AbstractController
+      include ExternalPrograms
+      
       def run
         editor = Editor.new(&@configuration.editor)
 
@@ -76,7 +79,7 @@ module AsciiDataTools
       def defaults
         {:expected_argument_number => 2,
          :input_pipe_accepted => false,
-         :editor => lambda {|filenames| Kernel.system "vimdiff #{filenames.join(' ')}"} }
+         :editor => lambda {|filenames| edit_differences(filenames)} }
       end
     end
   end

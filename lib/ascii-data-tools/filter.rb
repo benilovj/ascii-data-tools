@@ -1,4 +1,5 @@
 require 'tempfile'
+require 'lib/ascii-data-tools/external_programs'
 
 module AsciiDataTools
   module Filter
@@ -92,13 +93,14 @@ module AsciiDataTools
     end
     
     class SortingFilter < BufferingFilter
+      include ExternalPrograms
       def filter_all(tempfile)
         tempfile.close
         
         sorted_tempfile = Tempfile.new("sort")
         sorted_tempfile.close
         
-        Kernel.system("sort #{tempfile.path} > #{sorted_tempfile.path}")
+        sort(tempfile, sorted_tempfile)
         sorted_tempfile.open
       end
     end
@@ -127,19 +129,16 @@ module AsciiDataTools
     end
     
     class DiffExecutingFilter < BufferingFilter
+      include ExternalPrograms
       def initialize
         super do |tempfiles|
-          stream = IO.popen(diff_command_for(tempfiles))
+          stream = diff(tempfiles)
           raise StreamsEqualException.new if stream.eof?
           stream
         end
       end
             
       protected
-      def diff_command_for(tempfiles)
-        "diff #{tempfiles.collect {|t| t.path}.join(' ')}"
-      end
-      
       def upstream
         if @first_time
           tempfiles = @upstream.collect {|stream| buffer_as_tempfile(stream)}
