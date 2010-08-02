@@ -48,12 +48,12 @@ module AsciiDataTools
       end
       
       it "should be chainable" do
-        first_filter = Filter.new do |record|
-          (record.strip.to_i * 2).to_s + "\n"
-        end
-        Filter.new do |record|
-          (record.strip.to_i + 3).to_s + "\n"
-        end.should output("5\n7\n").from_upstream(first_filter, "1\n2\n")
+        f1 = Filter.new {|r| r.gsub(/\d/, "X") }
+        f2 = Filter.new {|r| r.count("X").to_s }
+        f3 = Filter.new {|r| r }
+
+        f3 << (f2 << (f1 << input_source_containing("ab1cd2")))
+        f3.read.should == "2"
       end
     end
     

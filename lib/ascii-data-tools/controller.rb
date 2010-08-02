@@ -1,5 +1,5 @@
 require 'ascii-data-tools/filter'
-require 'lib/ascii-data-tools/external_programs'
+require 'ascii-data-tools/external_programs'
 
 module AsciiDataTools
   module Controller
@@ -52,20 +52,21 @@ module AsciiDataTools
     
     class QDiffController < AbstractController
       include ExternalPrograms
+      include Filter
       
       def run
         editor = Editor.new(&@configuration.editor)
 
-        normaliser1    = Filter::NormalisingFilter.new( @configuration.input_sources[0].filename, type_determiner)
-        normaliser2    = Filter::NormalisingFilter.new( @configuration.input_sources[1].filename, type_determiner)
-        sorter1        = Filter::SortingFilter.new
-        sorter2        = Filter::SortingFilter.new
-        diff_executer  = Filter::DiffExecutingFilter.new
-        diff_parser    = Filter::DiffParsingFilter.new
-        diff_formatter = Filter::DiffFormattingFilter.new(type_determiner)
+        normaliser1    = NormalisingFilter.new( @configuration.input_sources[0].filename, type_determiner)
+        normaliser2    = NormalisingFilter.new( @configuration.input_sources[1].filename, type_determiner)
+        sorter1        = SortingFilter.new
+        sorter2        = SortingFilter.new
+        diff_executer  = DiffExecutingFilter.new
+        diff_parser    = DiffParsingFilter.new
+        diff_formatter = DiffFormattingFilter.new(type_determiner)
         
-        diff_formatter << diff_parser << diff_executer << [sorter1 << normaliser1 << @configuration.input_sources[0],
-                                                           sorter2 << normaliser2 << @configuration.input_sources[1]]
+        diff_formatter << (diff_parser << (diff_executer << [sorter1 << (normaliser1 << @configuration.input_sources[0]),
+                                                             sorter2 << (normaliser2 << @configuration.input_sources[1])]))
         
         begin
           diff_formatter.write(editor[0], editor[1])

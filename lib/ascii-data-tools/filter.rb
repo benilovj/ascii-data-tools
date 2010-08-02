@@ -1,5 +1,5 @@
 require 'tempfile'
-require 'lib/ascii-data-tools/external_programs'
+require 'ascii-data-tools/external_programs'
 
 module AsciiDataTools
   module Filter
@@ -10,7 +10,7 @@ module AsciiDataTools
       
       def <<(upstream_filter)
         @upstream = upstream_filter
-        upstream_filter
+        self
       end
       
       def read

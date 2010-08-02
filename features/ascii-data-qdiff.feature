@@ -18,7 +18,9 @@ Feature: ascii-data-qdiff support
     When ascii-data-qdiff is invoked on files containing:
       """
       EXAMPLE01MO 1112345678      442012345678    0012\n  ||  EXAMPLE01MO 9954321098      442012345678    0012\n
+      EXAMPLE01MO 9992345678      442012345678    0012\n  ||  EXAMPLE01MO 9992345678      442012345678    0012\n
       EXAMPLE02internet    2010010112000007220156\n       ||  EXAMPLE02internet    2010010112000007220156\n
+      EXAMPLE02internet    2010010113000001500000\n       ||  EXAMPLE02internet    2010010113000001500156\n
       EXAMPLE01SMS4998765432      55555           0099\n  ||  --------------------------------------------------
       """
     Then the diffed result should be:
@@ -32,7 +34,7 @@ Feature: ascii-data-qdiff support
       06 END_OF_RECORD    : [\n]-------------------  ||  06 END_OF_RECORD    : [\n]-------------------
                                                      ||  
       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~||  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-                                                     ||  
+                                                     ||  -----------------------------------------------
       Record (EXAMPLE01)                             ||  -----------------------------------------------
       01 RECORD_TYPE      : [EXAMPLE01]------------  ||  -----------------------------------------------
       02 USAGE            : [SMS]------------------  ||  -----------------------------------------------
@@ -40,5 +42,13 @@ Feature: ascii-data-qdiff support
       04 B_NUMBER         : [55555           ]-----  ||  -----------------------------------------------
       05 CHARGEABLE_UNITS : [0099]-----------------  ||  -----------------------------------------------
       06 END_OF_RECORD    : [\n]-------------------  ||  -----------------------------------------------
-                                                     ||  -----------------------------------------------
+                                                     ||  
+      Record (EXAMPLE02)                             ||  Record (EXAMPLE02)
+      01 RECORD_TYPE      : [EXAMPLE02]----------    ||  01 RECORD_TYPE      : [EXAMPLE02]----------
+      02 APN              : [internet    ]-------    ||  02 APN              : [internet    ]-------
+      03 TIMESTAMP        : [XXXXXXXXXXXXXX]-----    ||  03 TIMESTAMP        : [XXXXXXXXXXXXXX]-----
+      04 SESSION_DURATION : [0150]---------------    ||  04 SESSION_DURATION : [0150]---------------
+      05 CHARGEABLE_UNITS : [0000]---------------    ||  05 CHARGEABLE_UNITS : [0156]---------------
+      06 END_OF_RECORD    : [\n]-----------------    ||  06 END_OF_RECORD    : [\n]-----------------
+                                                     ||  
       """
