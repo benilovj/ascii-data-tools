@@ -25,6 +25,10 @@ module AsciiDataTools
       end
       
       protected
+      def input_source
+        @configuration.input_sources.first
+      end
+      
       def defaults
         {:expected_argument_number => 1, :input_pipe_accepted => true}
       end
@@ -32,18 +36,43 @@ module AsciiDataTools
     
     class CatController < AbstractController
       def run
-        input_source = @configuration.input_sources.first
-
         formatting_filter = Filter::FormattingFilter.new(input_source.filename, type_determiner)
         formatting_filter << input_source
         formatting_filter.write(@configuration.output_stream)
       end
     end
     
+    class EditController < AbstractController
+      include ExternalPrograms
+      include Filter
+
+      def run
+        editor = Editor.new(&@configuration.editor)
+        formatting_filter = FormattingFilter.new(input_source.filename, type_determiner)
+        formatting_filter << input_source
+        
+        formatting_filter.write(editor[0])
+        editor.edit
+        
+        copy_filter = Filter::Filter.new do |record| record end
+        copy_filter << InputSource.new(nil, editor[0].open)
+        copy_filter.write(output_stream)
+      end
+      
+      protected
+      def output_stream
+        @configuration.output_stream || File.open(input_source.filename)
+      end
+      
+      def defaults
+        {:expected_argument_number => 1,
+         :input_pipe_accepted => false,
+         :editor => lambda {|filenames| edit_differences(filenames)} }
+      end
+    end
+    
     class NormalisationController < AbstractController
       def run
-        input_source = @configuration.input_sources.first
-
         normalising_filter = Filter::NormalisingFilter.new(input_source.filename, type_determiner)
         normalising_filter << input_source
         normalising_filter.write(@configuration.output_stream)
