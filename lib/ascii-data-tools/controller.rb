@@ -1,4 +1,5 @@
 require 'ascii-data-tools/filter'
+require 'ascii-data-tools/filter/diffing'
 require 'ascii-data-tools/external_programs'
 
 module AsciiDataTools
@@ -87,6 +88,7 @@ module AsciiDataTools
     class QDiffController < AbstractController
       include ExternalPrograms
       include Filter
+      include Filter::Diffing
       
       def run
         editor = Editor.new(&@configuration.editor)
@@ -105,7 +107,7 @@ module AsciiDataTools
         begin
           diff_formatter.write(editor[0], editor[1])
           editor.edit
-        rescue Filter::StreamsEqualException => e
+        rescue StreamsEqualException => e
           @configuration.user_feedback_stream.puts "The files are identical."
         end        
       end
