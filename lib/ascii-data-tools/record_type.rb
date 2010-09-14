@@ -71,7 +71,6 @@ module AsciiDataTools
       include RecordEncoder
       include Normaliser
       attr_reader :name
-      # attr_reader :fields
       
       def initialize(name, fields = [])
         @name = name
