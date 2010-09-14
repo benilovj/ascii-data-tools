@@ -19,7 +19,7 @@ module AsciiDataTools
       end
       
       def regexp_string
-        fields.inject("\\A") {|regexp_string, field| field.extend_regexp_string_for_matching(regexp_string) } + "\\z"
+        @fields.inject("\\A") {|regexp_string, field| field.extend_regexp_string_for_matching(regexp_string) } + "\\z"
       end
 
       def regexp_for_matching_type
@@ -41,13 +41,13 @@ module AsciiDataTools
       end
 
       def fields_to_normalise
-        @fields_to_normalise ||= fields.select {|f| f.normalised?}
+        @fields_to_normalise ||= @fields.select {|f| f.normalised?}
       end
 
       def make_normalising_regexp_for(field)
-        index_of_normalised_field = fields.index(field)
-        preceeding_fields = fields[0...index_of_normalised_field]
-        proceeding_fields = fields[index_of_normalised_field+1..-1]
+        index_of_normalised_field = @fields.index(field)
+        preceeding_fields = @fields[0...index_of_normalised_field]
+        proceeding_fields = @fields[index_of_normalised_field+1..-1]
 
         regexp_for_preceeding_fields = preceeding_fields.collect {|f| length_match_for(f) }.join
         regexp_for_proceeding_fields = proceeding_fields.collect {|f| length_match_for(f) }.join
@@ -71,7 +71,7 @@ module AsciiDataTools
       include RecordEncoder
       include Normaliser
       attr_reader :name
-      attr_reader :fields
+      # attr_reader :fields
       
       def initialize(name, fields = [])
         @name = name
@@ -88,6 +88,10 @@ module AsciiDataTools
       
       def field_names
         @fields.collect {|f| f.name}
+      end
+      
+      def number_of_content_fields
+        @fields.size
       end
       
       def total_length_of_fields

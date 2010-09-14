@@ -57,6 +57,10 @@ module AsciiDataTools
           @type.field_names.should == ["field100", "field1", "field10"]
         end
         
+        it "should provide the number of content fields" do
+          @type.number_of_content_fields.should == 3
+        end
+        
         it "should provide the length of the field with the longest name" do
           @type.length_of_longest_field_name.should == 8
         end
@@ -95,7 +99,8 @@ module AsciiDataTools
           make_field("field1",   :length => 5),
           make_field("field10",  :length => 1)
         ]
-        @type = Struct.new(:fields).new(@fields)
+        @type = Object.new
+        @type.instance_variable_set(:@fields, @fields)
         @type.extend(RecordDecoder)
       end
       
@@ -316,7 +321,7 @@ module AsciiDataTools
       it "should include the builder for new types for convenience" do
         repo = RecordTypeRepository.new
         repo.record_type("ABC") { field "xyz", :length => 3 }
-        repo.type("ABC").should have(1).fields
+        repo.type("ABC").number_of_content_fields.should == 1
       end
     end
 
@@ -369,7 +374,8 @@ module AsciiDataTools
            make_field("field3", :length => 3, :normalised => true),
            make_field("field4", :length => 1)
          ]
-         @type = Struct.new(:fields).new(@fields)
+         @type = Object.new
+         @type.instance_variable_set(:@fields, @fields)
          @type.extend(Normaliser)
       end
 

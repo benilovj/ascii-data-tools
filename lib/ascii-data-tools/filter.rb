@@ -130,7 +130,7 @@ module AsciiDataTools
       
       def parse_values_from_subsequent_lines(record_type)
         values = []
-        record_type.fields.length.times { values << parse_value_from(upstream.read) }
+        record_type.number_of_content_fields.times { values << parse_value_from(upstream.read) }
         values
       end
       
