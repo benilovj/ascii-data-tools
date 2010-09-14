@@ -1,4 +1,3 @@
-require 'tempfile'
 require 'ascii-data-tools/external_programs'
 
 module AsciiDataTools
