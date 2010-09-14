@@ -3,12 +3,17 @@ require 'stringio'
 
 module AsciiDataTools
   describe Configuration do
-    it "should allow overwriting the input source and output stream" do
+    it "should allow overwriting the input source, output stream, record types and user feedback stream" do
       input_source = mock("input source")
       output_stream = mock("output stream")
-      config = Configuration.new([], {:input_sources => [input_source], :output_stream => output_stream, :record_types => "record types"})
+      config = Configuration.new([], {:input_sources => [input_source],
+                                      :output_stream => output_stream,
+                                      :record_types => "record types",
+                                      :user_feedback_stream => "user feedback stream"})
       config.output_stream.should == output_stream
       config.input_sources.should == [input_source]
+      config.record_types.should == "record types"
+      config.user_feedback_stream.should == "user feedback stream"
     end
     
     it "should not be valid unless the input stream is specified" do
@@ -115,6 +120,23 @@ module AsciiDataTools
       editor.edit
       
       result_aggregator.should == "file1 file2 file3"
+    end
+    
+    it "should detect when no changes were made during editing" do
+      editor = Editor.new do |filenames| end
+      editor[0] << "hello"
+      editor.edit
+      editor.changed?(0).should be_false
+    end
+    
+    it "should detect when a change was made during editing" do
+      now = Time.new
+      File.should_receive(:mtime).and_return(now, now+1)
+      
+      editor = Editor.new do |filenames| end
+      editor[0] << "hello"
+      editor.edit
+      editor.changed?(0).should be_true
     end
   end
   

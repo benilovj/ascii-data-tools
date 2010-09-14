@@ -24,6 +24,19 @@ module AsciiDataTools
         @type.field_names.zip(@values)
       end
       
+      def encode
+        @type.encode(values)
+      end
+      
+      def to_s
+        contents = field_names_and_values.map {|field_name, value| "#{field_name} => #{value.inspect}"}.join(", ")
+        "#{type_name}: #{contents}"
+      end
+      
+      def ==(other)
+        self.type == other.type and self.values == other.values
+      end
+      
       protected
       def field_names_and_values
         @type.field_names.zip(@values)

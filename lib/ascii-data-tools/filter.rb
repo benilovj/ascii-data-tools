@@ -235,6 +235,45 @@ module AsciiDataTools
         right_range = right_start.to_i..(right_end || right_start).to_i
         [left_range, command, right_range]
       end
-    end    
+    end
+    
+    class ParsingFilter < Filter
+      def initialize(record_types)
+        @record_types = record_types
+      end
+      
+      def filter(record)
+        header_line = record
+        record_type = identify_record_type_from(header_line)
+        values = parse_values_from_subsequent_lines(record_type)
+        
+        consume_empty_line_between_records
+        
+        AsciiDataTools::Record::Record.new(record_type, values)
+      end
+      
+      protected
+      def identify_record_type_from(header_line)
+        match = header_line.match(/Record \d+ \((.*?)\)/)
+        raise "Cannot find record type in line #{header_line}!" unless match
+        expected_record_type_name = match[1]
+        @record_types.find_by_name(expected_record_type_name)
+      end
+      
+      def parse_values_from_subsequent_lines(record_type)
+        values = []
+        record_type.fields.length.times { values << parse_value_from(upstream.read) }
+        values
+      end
+      
+      def parse_value_from(line)
+        value = line.match(/.*?\[(.*?)\]/)[1]
+        value.gsub("\\n", "\n")
+      end
+      
+      def consume_empty_line_between_records
+        upstream.read
+      end
+    end
   end
 end

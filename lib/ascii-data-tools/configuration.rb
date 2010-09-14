@@ -4,7 +4,7 @@ require 'tempfile'
 
 module AsciiDataTools
   class Configuration
-    attr_reader :input_sources, :output_stream, :errors, :record_types, :editor
+    attr_reader :input_sources, :output_stream, :errors, :record_types, :editor, :user_feedback_stream
     
     def initialize(arguments, overrides = {})
       @arguments = arguments
@@ -14,10 +14,11 @@ module AsciiDataTools
       @opts = define_optionparser_configuration
       remainder = parse(arguments)
 
-      @output_stream = overrides[:output_stream] || STDOUT
-      @input_sources = overrides[:input_sources] || make_input_streams(remainder, overrides)
-      @record_types  = overrides[:record_types]  || load_record_types
-      @editor        = overrides[:editor]
+      @output_stream        = overrides[:output_stream] || STDOUT
+      @input_sources        = overrides[:input_sources] || make_input_streams(remainder, overrides)
+      @record_types         = overrides[:record_types]  || load_record_types
+      @editor               = overrides[:editor]
+      @user_feedback_stream = overrides[:user_feedback_stream] || STDOUT
     end
     
     def valid?
@@ -62,8 +63,8 @@ module AsciiDataTools
     def parse(arguments)
       begin
         return @opts.parse(arguments)
-      rescue SystemExit
-        exit        
+      rescue SystemExit => e
+        exit e.status
       rescue Exception => e
         @errors << e.message
         return []
@@ -124,6 +125,8 @@ module AsciiDataTools
   class Editor
     def initialize(&edit_command)
       @tempfiles = {}
+      @preedit_mtimes = {}
+      @postedit_mtimes = {}
       @edit_command = edit_command
     end
     
@@ -132,11 +135,33 @@ module AsciiDataTools
     end
     
     def edit
-      @tempfiles.values.each {|f| f.close }
-      @edit_command[sorted_filenames]
+      close_all_tempfiles
+      save_preedit_mtimes
+      edit_files
+      save_postedit_mtimes
+    end
+    
+    def changed?(n)
+      not @preedit_mtimes[n] == @postedit_mtimes[n]
     end
     
     protected
+    def close_all_tempfiles
+      @tempfiles.values.each {|f| f.close }
+    end
+    
+    def save_preedit_mtimes
+      @tempfiles.each {|n, f| @preedit_mtimes[n] = File.mtime(f.path)}
+    end
+
+    def save_postedit_mtimes
+      @tempfiles.each {|n, f| @postedit_mtimes[n] = File.mtime(f.path)}
+    end
+    
+    def edit_files
+      @edit_command[sorted_filenames]
+    end
+    
     def sorted_filenames
       @tempfiles.sort.collect {|number, tempfile| tempfile.path}
     end

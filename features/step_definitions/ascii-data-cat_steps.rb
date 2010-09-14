@@ -3,6 +3,7 @@ require 'stringio'
 Before do |scenario|
   @output_stream = StringIO.new
   @input_stream = StringIO.new
+  @user_feedback_stream = StringIO.new
   
   @command_line = []
   
@@ -40,4 +41,8 @@ end
 
 Then /^the following is printed out:$/ do |string|
   @output_stream.string.should == string
+end
+
+Then /^the user receives the following feedback:$/ do |string|
+  @user_feedback_stream.string.should == string
 end

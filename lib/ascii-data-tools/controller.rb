@@ -54,14 +54,19 @@ module AsciiDataTools
         formatting_filter.write(editor[0])
         editor.edit
         
-        copy_filter = Filter::Filter.new do |record| record end
-        copy_filter << InputSource.new(nil, editor[0].open)
-        copy_filter.write(output_stream)
+        if not editor.changed?(0)        
+          @configuration.user_feedback_stream.puts "The file is unmodified."
+        else
+          encoding_filter = Filter::Filter.new {|record| record.encode }
+          parsing_filter = ParsingFilter.new(@configuration.record_types)
+          encoding_filter << (parsing_filter << InputSource.new(nil, editor[0].open))
+          encoding_filter.write(output_stream)
+        end
       end
       
       protected
       def output_stream
-        @configuration.output_stream || File.open(input_source.filename)
+        @configuration.output_stream == STDOUT ? File.open(input_source.filename, 'w') : @configuration.output_stream
       end
       
       def defaults
@@ -101,7 +106,7 @@ module AsciiDataTools
           diff_formatter.write(editor[0], editor[1])
           editor.edit
         rescue Filter::StreamsEqualException => e
-          @configuration.output_stream.puts "The files are identical."
+          @configuration.user_feedback_stream.puts "The files are identical."
         end        
       end
       

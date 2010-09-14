@@ -60,8 +60,15 @@ module AsciiDataTools
       end
     end
     
+    module RecordEncoder
+      def encode(values)
+        values.join
+      end
+    end
+    
     class Type
       include RecordDecoder
+      include RecordEncoder
       include Normaliser
       attr_reader :name
       attr_reader :fields

@@ -8,7 +8,7 @@ Feature: ascii-data-qdiff support
       """
       EXAMPLE01MO 1112345678      442012345678    0012\n  ||  EXAMPLE01MO 1112345678      442012345678    0012\n
       """
-    Then the following is printed out:
+    Then the user receives the following feedback:
       """
       The files are identical.
       

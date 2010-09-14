@@ -73,6 +73,10 @@ module AsciiDataTools
           @type.constraints_description.should be_empty
         end
         
+        it "should encode values by just concatenating them" do
+          @type.encode(["abc", "xyz", "\n"]).should == "abcxyz\n"
+        end
+        
         it "should provide a list of comma-delimited field constraints as the constraints description" do
           @type["field100"].should_be_constrained_to("ABC")
           @type.constraints_description.should == "field100 = ABC"

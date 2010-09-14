@@ -149,5 +149,52 @@ module AsciiDataTools
         end
       end
     end
+    
+    DECODED_FIXED_LENGTH_RECORD = <<STR
+Record 01 (ABC)
+01 field1  : [12345]-----
+02 field10 : [abc]-------
+03 field3  : [\\n]--------
+
+STR
+    
+    SEVERAL_FIXED_LENGTH_RECORDS = <<STR
+Record 01 (unknown)
+01 UNKNOWN  : [12345]-----
+
+Record 02 (unknown)
+01 UNKNOWN  : [abc]-----
+
+STR
+    
+    describe ParsingFilter do
+      include RecordTypeHelpers
+      include AsciiDataTools::Record
+      include AsciiDataTools::RecordType
+      it "should identify a decoded record and encode it" do
+        type = type("ABC") do
+          field 'field1',  :length => 5
+          field 'filed10', :length => 3
+          field 'field3',  :length => 1
+        end
+        record_types = mock(AsciiDataTools::RecordType::RecordTypeRepository)
+        record_types.should_receive(:find_by_name).with("ABC").and_return(type)
+        
+        filter = ParsingFilter.new(record_types)
+        filter << input_source_containing(DECODED_FIXED_LENGTH_RECORD)
+        filter.read.should == Record.new(type, ["12345", "abc", "\n"])
+      end
+      
+      it "should identify a decoded record and encode it" do
+        type = UnknownType.new
+        record_types = mock(AsciiDataTools::RecordType::RecordTypeRepository)
+        record_types.should_receive(:find_by_name).with("unknown").twice.and_return(type)
+        
+        filter = ParsingFilter.new(record_types)
+        filter << input_source_containing(SEVERAL_FIXED_LENGTH_RECORDS)
+        filter.read.should == Record.new(type, ["12345"])
+        filter.read.should == Record.new(type, ["abc"])
+      end
+    end
   end
 end

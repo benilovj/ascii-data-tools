@@ -1,5 +1,9 @@
 module AsciiDataTools
   module ExternalPrograms
+    def modify_file_mtime_to(new_mtime)
+      Kernel.system("touch -am -t #{new_mtime.strftime('%Y%m%d%H%M.%S')} #{self.path}")
+    end
+    
     def diff(files)
       IO.popen(diff_command_for(files))
     end
