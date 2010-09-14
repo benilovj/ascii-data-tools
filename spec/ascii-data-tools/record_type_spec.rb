@@ -99,8 +99,7 @@ module AsciiDataTools
           make_field("field1",   :length => 5),
           make_field("field10",  :length => 1)
         ]
-        @type = Object.new
-        @type.instance_variable_set(:@fields, @fields)
+        @type = Struct.new(:fields).new(@fields)
         @type.extend(RecordDecoder)
       end
       
@@ -374,8 +373,7 @@ module AsciiDataTools
            make_field("field3", :length => 3, :normalised => true),
            make_field("field4", :length => 1)
          ]
-         @type = Object.new
-         @type.instance_variable_set(:@fields, @fields)
+         @type = Struct.new(:fields).new(@fields)
          @type.extend(Normaliser)
       end
 
