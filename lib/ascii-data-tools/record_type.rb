@@ -66,10 +66,14 @@ module AsciiDataTools
       end
     end
     
-    class Type
+    module FixedLengthType
       include RecordDecoder
       include RecordEncoder
       include Normaliser
+    end
+    
+    class Type
+      include FixedLengthType
       attr_reader :name
       
       def initialize(name, fields = [])
