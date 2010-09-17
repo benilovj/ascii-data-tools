@@ -1,6 +1,5 @@
 module RecordTypeHelpers
-  include AsciiDataTools::RecordType::TypeBuilder
-  include AsciiDataTools::RecordType::FieldBuilder
+  include AsciiDataTools::RecordType::Builder::TypeBuilder
   
   alias :type :build_type
   alias :make_field :build_field

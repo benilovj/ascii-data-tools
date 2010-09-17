@@ -1,5 +1,6 @@
 require 'set'
 require 'ascii-data-tools/record_type/field'
+require 'ascii-data-tools/record_type/builder'
 
 module AsciiDataTools
   module RecordType
@@ -165,35 +166,10 @@ module AsciiDataTools
         end
       end
     end
-
-    module FieldBuilder
-      def build_field(name, properties)
-        field = Field::FixedLengthField.new(name, properties[:length])
-        field.should_be_constrained_to(properties[:constrained_to]) unless properties[:constrained_to].nil?
-        field.should_be_normalised if properties[:normalised]
-        field
-      end
-    end
-
-    module TypeBuilder
-      include FieldBuilder
-      def build_type(type_name, properties = {}, &block)
-        @fields = []
-        instance_eval(&block) unless block.nil?
-        type = TypeWithFilenameRestrictions.new(type_name, @fields)
-        type.filename_should_match(properties[:applies_for_filenames_matching]) unless properties[:applies_for_filenames_matching].nil?
-        type
-      end
-
-      protected
-      def field(name, properties)
-        @fields << build_field(name, properties)
-      end
-    end
     
     class RecordTypeRepository
       include Enumerable
-      include TypeBuilder
+      include Builder::TypeBuilder
       
       def initialize(types = [])
         @types = Set.new(types)

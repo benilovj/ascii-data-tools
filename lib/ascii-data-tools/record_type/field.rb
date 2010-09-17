@@ -1,5 +1,3 @@
-require 'set'
-
 module AsciiDataTools
   module RecordType
     module Field
