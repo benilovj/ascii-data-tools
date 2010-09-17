@@ -1,4 +1,5 @@
 require 'set'
+require 'ascii-data-tools/record_type/field'
 
 module AsciiDataTools
   module RecordType
@@ -117,7 +118,7 @@ module AsciiDataTools
       UNKNOWN_RECORD_TYPE_NAME = "unknown"
       
       def initialize
-        super(UNKNOWN_RECORD_TYPE_NAME, [Field.new("UNKNOWN")])
+        super(UNKNOWN_RECORD_TYPE_NAME, [Field::Field.new("UNKNOWN")])
       end
       
       def decode(ascii_string)
@@ -126,7 +127,7 @@ module AsciiDataTools
     end
     
     class TypeWithFilenameRestrictions < Type
-      def initialize(type_name, fields = [], filename_constraint = FilenameConstraint.new)
+      def initialize(type_name, fields = [], filename_constraint = Field::FilenameConstraint.new)
         super(type_name, fields)
         @filename_constraint = filename_constraint
       end
@@ -136,141 +137,13 @@ module AsciiDataTools
       end
       
       def filename_should_match(regexp)
-        @filename_constraint = FilenameConstraint.satisfied_by_filenames_matching(regexp)
+        @filename_constraint = Field::FilenameConstraint.satisfied_by_filenames_matching(regexp)
         self
       end
       
       def constraints_description
         descriptions = [@filename_constraint.to_s, super].reject {|desc| desc.empty?}
         descriptions.join(", ")
-      end
-    end
-    
-    class Field
-      attr_reader :name
-      attr_writer :constraint
-      
-      def initialize(name, constraint = NoConstraint.new)
-        @name = name
-        @constraint = constraint
-        @normalised = false
-      end
-      
-      def normalised?
-        @normalised
-      end
-      
-      def should_be_normalised
-        @normalised = true
-      end
-      
-      def constraint_description
-        unless @constraint.to_s.empty?
-          name + " " + @constraint.to_s
-        else
-          ""
-        end
-      end
-
-      def should_be_constrained_to(value)
-        if value.is_a?(Regexp)
-          @constraint = RegexpConstraint.new(value)
-        else
-          @constraint = OneOfConstraint.new(value)
-        end
-      end
-    end
-    
-    class FixedLengthField < Field
-      attr_reader :length
-      
-      def initialize(name, length, constraint = nil)
-        super(name, constraint || FixedLengthConstraint.new(length))
-        @length = length
-      end
-      
-      def extend_regexp_string_for_matching(regexp_string)
-        @constraint.extend_regexp_string_for_matching(regexp_string)
-      end
-    end
-    
-    class NoConstraint
-      def extend_regexp_string_for_matching(regexp_string)
-        regexp_string
-      end
-      
-      def to_s; ""; end
-    end
-    
-    class FixedLengthConstraint
-      def initialize(length)
-        @length = length
-      end
-      
-      def extend_regexp_string_for_matching(regexp_string)
-        regexp_string + "(.{#{@length}})"
-      end
-      
-      def to_s; ""; end
-    end
-    
-    class OneOfConstraint
-      def initialize(*possible_values)
-        @possible_values = possible_values.flatten
-      end
-      
-      def extend_regexp_string_for_matching(regexp_string)
-        regexp_string + "(#{@possible_values.join('|')})"
-      end
-      
-      def to_s
-        if @possible_values.length == 1
-          "= #{@possible_values.first}"
-        else
-          "one of #{@possible_values.join(', ')}"
-        end
-      end
-    end
-    
-    class RegexpConstraint
-      def initialize(regexp_that_must_match)
-        @regexp_that_must_match = regexp_that_must_match
-      end
-
-      def extend_regexp_string_for_matching(regexp_string)
-        regexp_string + @regexp_that_must_match.source
-      end
-
-      def satisfied_by?(string)
-        string =~ @regexp_that_must_match
-      end
-
-      def to_s
-        "=~ #{@regexp_that_must_match.inspect}"
-      end
-    end
-    
-    class FilenameConstraint
-      def initialize(constraint = nil)
-        @filename_constraint = constraint
-      end
-
-      def satisfied_by?(string)
-        @filename_constraint.nil? or @filename_constraint.satisfied_by?(string)
-      end
-
-      def to_s
-        unless @filename_constraint.nil?
-          "Filename #{@filename_constraint.to_s}"
-        else
-          ""
-        end
-      end
-
-      class << self
-        def satisfied_by_filenames_matching(regexp)
-          new(RegexpConstraint.new(regexp))
-        end
       end
     end
 
@@ -295,7 +168,7 @@ module AsciiDataTools
 
     module FieldBuilder
       def build_field(name, properties)
-        field = FixedLengthField.new(name, properties[:length])
+        field = Field::FixedLengthField.new(name, properties[:length])
         field.should_be_constrained_to(properties[:constrained_to]) unless properties[:constrained_to].nil?
         field.should_be_normalised if properties[:normalised]
         field
