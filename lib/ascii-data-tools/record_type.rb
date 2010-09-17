@@ -3,18 +3,13 @@ require 'ascii-data-tools/record_type/field'
 require 'ascii-data-tools/record_type/builder'
 require 'ascii-data-tools/record_type/normaliser'
 require 'ascii-data-tools/record_type/decoder'
+require 'ascii-data-tools/record_type/encoder'
 
 module AsciiDataTools
   module RecordType
-    module RecordEncoder
-      def encode(values)
-        values.join
-      end
-    end
-    
     module FixedLengthType
       include Decoder::RecordDecoder
-      include RecordEncoder
+      include Encoder::RecordEncoder
       include Normaliser::Normaliser
     end
     
