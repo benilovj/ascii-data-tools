@@ -15,16 +15,15 @@ sectors (e.g. call detail records).
 == Features:
 === (already implemented)
 
-* Automatic identification and decoding of fixed length records from
-flat files, gzipped files or input streams
+* Automatic identification and decoding of fixed length records from flat files, gzipped files or input streams
+* ASCII file editing
+* record normalisation
 
 For more details, check out the Cucumber StoryTests in the "features" folder.
 
 === (coming soon)
 
 * csv and variable-length record processing
-* ASCII file editing
-* record normalisation
 
 == Examples:
 
