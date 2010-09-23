@@ -1,7 +1,7 @@
 Feature: ascii-data-cat support
   In order to understand the contents of ascii-encoded record streams quicker
   As a tester
-  I want a tool to decode and pretty print the streams
+  I want to decode and pretty print the streams
   
   Background:
     Given the following configuration:
