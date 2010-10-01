@@ -23,7 +23,7 @@ module AsciiDataTools
         end
 
         protected
-        def field(name, properties)
+        def field(name, properties = {})
           @fields << build_field(name, properties)
         end
       end

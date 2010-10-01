@@ -11,6 +11,10 @@ module AsciiDataTools
       include Decoder::RecordDecoder
       include Encoder::RecordEncoder
       include Normaliser::Normaliser
+      
+      def total_length_of_fields
+        @total_length ||= @fields.inject(0) {|sum, field| sum + field.length}
+      end
     end
     
     class Type
@@ -36,10 +40,6 @@ module AsciiDataTools
       
       def number_of_content_fields
         @fields.size
-      end
-      
-      def total_length_of_fields
-        @total_length ||= @fields.inject(0) {|sum, field| sum + field.length}
       end
       
       def length_of_longest_field_name

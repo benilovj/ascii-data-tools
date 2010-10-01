@@ -40,54 +40,57 @@ module AsciiDataTools
     
     describe Type do
       include RecordTypeHelpers
-      it "should have a name" do
-        type("ABC").name.should == "ABC"
+      
+      before do
+        @type = type("ABC") do
+          field "field100"
+          field "field1"
+          field "field10"
+        end
       end
       
-      context "(for fixed length records)" do
-        before do
-          @type = type("ABC") do
-            field "field100", :length => 3
-            field "field1",   :length => 5
-            field "field10",  :length => 1
-          end
-        end
-
-        it "should provide the field names" do
-          @type.field_names.should == ["field100", "field1", "field10"]
-        end
+      it "should have a name" do
+        @type.name.should == "ABC"
+      end
+      
+      it "should provide the field names" do
+        @type.field_names.should == ["field100", "field1", "field10"]
+      end
+      
+      it "should provide the number of content fields" do
+        @type.number_of_content_fields.should == 3
+      end
+      
+      it "should provide the length of the field with the longest name" do
+        @type.length_of_longest_field_name.should == 8
+      end
+      
+      it "should provide an empty constraints description when there are no constraints" do
+        @type.constraints_description.should be_empty
+      end
+      
+      it "should provide a list of comma-delimited field constraints as the constraints description" do
+        @type["field100"].should_be_constrained_to("ABC")
+        @type.constraints_description.should == "field100 = ABC"
         
-        it "should provide the number of content fields" do
-          @type.number_of_content_fields.should == 3
+        @type["field10"].should_be_constrained_to("DEF")
+        @type.constraints_description.should == "field100 = ABC, field10 = DEF"          
+      end
+    end
+    
+    describe FixedLengthType do
+      include RecordTypeHelpers
+      
+      before do
+        @type = type("ABC") do
+          field "field100", :length => 3
+          field "field1",   :length => 5
+          field "field10",  :length => 1
         end
-        
-        it "should provide the length of the field with the longest name" do
-          @type.length_of_longest_field_name.should == 8
-        end
-        
-        it "should decode records correctly" do
-          @type.decode("XYZ12345\n").values.should == ["XYZ", "12345", "\n"]
-        end
-        
-        it "should provide the total length of the fields" do
-          @type.total_length_of_fields.should == 9
-        end
-        
-        it "should provide an empty constraints description when there are no constraints" do
-          @type.constraints_description.should be_empty
-        end
-        
-        it "should encode values by just concatenating them" do
-          @type.encode(["abc", "xyz", "\n"]).should == "abcxyz\n"
-        end
-        
-        it "should provide a list of comma-delimited field constraints as the constraints description" do
-          @type["field100"].should_be_constrained_to("ABC")
-          @type.constraints_description.should == "field100 = ABC"
-          
-          @type["field10"].should_be_constrained_to("DEF")
-          @type.constraints_description.should == "field100 = ABC, field10 = DEF"          
-        end
+      end
+      
+      it "should provide the total length of the fields" do
+        @type.total_length_of_fields.should == 9
       end
     end
     
