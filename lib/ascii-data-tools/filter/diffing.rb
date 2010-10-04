@@ -8,8 +8,8 @@ module AsciiDataTools
       
         def initialize(type_determiner)
           super(nil, type_determiner)
-          def @formatter.make_type_template_for(record_type)
-            Formatting::UnnumberedTypeTemplate.new(record_type)
+          def @formatter.formattable(record_type)
+            record_type.extend(Formatting::UnnumberedFormatableType) unless record_type.instance_of?(Formatting::UnnumberedFormatableType)
           end
         end
       

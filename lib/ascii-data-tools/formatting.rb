@@ -3,11 +3,10 @@ module AsciiDataTools
     class Formatter
       def initialize
         @record_counter = 0
-        @type_templates = {}
       end
 
       def format(record)
-        type_template_for(record.type).format(next_record_counter_and_increment, record)
+        formattable(record.type).format(next_record_counter_and_increment, record.values)
       end
       alias :transform :format
             
@@ -16,83 +15,92 @@ module AsciiDataTools
         @record_counter += 1
       end
       
-      def type_template_for(record_type)
-        @type_templates[record_type] ||= make_type_template_for(record_type)
-      end
-      
-      def make_type_template_for(record_type)
-        TypeTemplate.new(record_type)
+      def formattable(record_type)
+        record_type.extend(FormatableType) unless record_type.instance_of?(FormatableType)
       end
     end
     
-    class TypeTemplate
-      MINIMUM_NUMBER_OF_DASHES = 5
-      LENGTH_LIMIT_OF_PADDED_LINE = 160
-      def initialize(type)
-        @type = type
-        @field_templates = make_field_templates
-      end
-      
-      def format(record_number, record)
-        [[header(record_number)] + dash_padded(field_strings_from(record.values))].join("\n") + "\n\n"
+    module FormatableType
+      def format(record_number, values)
+        template % ([record_number] + escaped(values))
       end
       
       protected
-      def make_field_templates
-        length_of_longest_field_name = @type.length_of_longest_field_name
-        @type.field_names.enum_with_index.map do |field_name, field_index|
-          FieldTemplate.new(field_index + 1, field_name, length_of_longest_field_name)
+      def template
+        @template ||= [header_template, field_templates, footer].flatten.join("\n")
+      end
+      
+      def header_template
+        "Record %02d (#{name})"
+      end
+      
+      def field_templates
+        make_fields_formatable_if_necessary
+        fields.enum_with_index.map do |field, index|
+          field.template(:position => index + 1,
+                         :longest_field_name => length_of_longest_field_name,
+                         :longest_field_length => longest_field_length,
+                         :last_field? => (index + 1 == fields.length))
         end
       end
       
-      def header(record_number)
-        header_template % record_number
+      def make_fields_formatable_if_necessary
+        fields.each {|field| field.extend(FormatableField) unless field.is_a?(FormatableField) }
       end
       
-      def header_template
-        @header_template ||= "Record %02d (#{@type.name})"
+      def longest_field_length
+        if fields.all? {|field| field.respond_to?(:length)}
+          fields.max_by {|field| field.length }.length
+        else
+          0
+        end
       end
       
-      def field_strings_from(values)
-        @field_templates.zip(values).map {|field_template, value| field_template.format(value) }
+      def escaped(values)
+        values.map {|val| val.gsub("\n", "\\n")}
       end
       
-      def dash_padded(field_strings)
-        length_of_longest_field_string = field_strings.max_by {|s| s.length}.length
-        number_of_dashes = [length_of_longest_field_string + MINIMUM_NUMBER_OF_DASHES, LENGTH_LIMIT_OF_PADDED_LINE].min
-        field_strings.collect {|field_string| field_string.ljust(number_of_dashes, "-") }
+      def footer
+        "\n"
       end
     end
     
-    class UnnumberedTypeTemplate < TypeTemplate
+    module UnnumberedFormatableType
+      include FormatableType
+      
+      def format(record_number, values)
+        template % escaped(values)
+      end
+      
       protected
       def header_template
-        @header_template ||= "Record (#{@type.name})"
+        "Record (#{name})"
       end
     end
     
-    class FieldTemplate
-      def initialize(field_number, field_name, length_of_longest_field_name)
-        @field_number = field_number
-        @field_name = field_name
-        @length_of_longest_field_name = length_of_longest_field_name
-      end
-      
-      def format(value)
-        field_template % escape_newline_in(value)
+    module FormatableField
+      PAD_CHARACTER = "-"
+      MINIMUM_NUMBER_OF_DASHES = 5
+      def template(properties)
+        "%02d %s : [%s]%s" % [ properties[:position],
+                               padded_field_name(name, properties[:longest_field_name]),
+                               "%s",
+                               padding(properties)
+                             ]
       end
       
       protected
-      def field_template
-        @field_template ||= "%02d %s" % [@field_number, padded_field_name(@field_name, @length_of_longest_field_name)] + " : [%s]"
-      end
-      
       def padded_field_name(field_name, length_of_longest_field_name)
         field_name.ljust(length_of_longest_field_name)
       end
       
-      def escape_newline_in(field_value)
-        field_value.gsub("\n", "\\n")
+      def padding(properties)
+        PAD_CHARACTER * number_of_pad_chars(properties)
+      end
+      
+      def number_of_pad_chars(properties)
+        return MINIMUM_NUMBER_OF_DASHES unless self.respond_to?(:length)
+        return MINIMUM_NUMBER_OF_DASHES + properties[:longest_field_length] - length - (properties[:last_field?] ? 1 : 0)
       end
     end
   end
