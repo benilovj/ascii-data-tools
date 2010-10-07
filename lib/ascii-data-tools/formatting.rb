@@ -22,7 +22,7 @@ module AsciiDataTools
     
     module FormatableType
       def format(record_number, values)
-        template % ([record_number] + escaped(values))
+        template % ([record_number] + escape_last(values))
       end
       
       protected
@@ -56,8 +56,10 @@ module AsciiDataTools
         end
       end
       
-      def escaped(values)
-        values.map {|val| val.gsub("\n", "\\n")}
+      def escape_last(values)
+        new_values = values.clone
+        new_values[-1] = values[-1].gsub("\n", "\\n")
+        new_values
       end
       
       def footer
@@ -69,7 +71,7 @@ module AsciiDataTools
       include FormatableType
       
       def format(record_number, values)
-        template % escaped(values)
+        template % escape_last(values)
       end
       
       protected
