@@ -55,15 +55,12 @@ module AsciiDataTools
     end
     
     class UnknownType < Type
+      include Decoder::UnknownRecordDecoder
       UNKNOWN_RECORD_TYPE_NAME = "unknown"
       
       def initialize
         super(UNKNOWN_RECORD_TYPE_NAME, [Field::Field.new("UNKNOWN")])
-      end
-      
-      def decode(ascii_string)
-        Record::Record.new(self, [ascii_string])
-      end
+      end      
     end
     
     class TypeWithFilenameRestrictions < Type

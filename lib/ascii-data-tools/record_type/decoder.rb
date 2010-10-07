@@ -25,6 +25,12 @@ module AsciiDataTools
           @regexp ||= Regexp.new(regexp_string, Regexp::MULTILINE)
         end
       end
+    
+      module UnknownRecordDecoder
+        def decode(ascii_string)
+          Record::Record.new(self, [ascii_string])
+        end
+      end
     end
   end
 end

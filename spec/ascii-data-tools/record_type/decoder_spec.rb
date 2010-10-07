@@ -34,6 +34,16 @@ module AsciiDataTools
           @type.should_not be_able_to_decode("ABC123456\n")
         end
       end
-    end
+
+      describe UnknownRecordDecoder do
+        it "should decode the entire ascii string into the UNKNOWN field" do
+          decoder = Struct.new(:field_names).new(["UNKNOWN"])
+          decoder.extend(UnknownRecordDecoder)
+          record = decoder.decode("any string\n")
+          record["UNKNOWN"].should == "any string\n"
+        end
+      end
+
+    end    
   end
 end
