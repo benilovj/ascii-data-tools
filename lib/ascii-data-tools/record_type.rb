@@ -1,4 +1,5 @@
 require 'set'
+require 'forwardable'
 require 'ascii-data-tools/record_type/field'
 require 'ascii-data-tools/record_type/builder'
 require 'ascii-data-tools/record_type/normaliser'
@@ -19,35 +20,16 @@ module AsciiDataTools
     
     class Type
       include FixedLengthType
+      extend Forwardable
       attr_reader :name
       
-      def initialize(name, fields = [])
+      def_delegator  :@fields, :names, :field_names
+      def_delegator  :@fields, :with_name, :field_with_name
+      def_delegators :@fields, :number_of_content_fields, :length_of_longest_field_name, :constraints_description
+      
+      def initialize(name, fields = Field::Fields.new)
         @name = name
         @fields = fields
-      end
-      
-      def [](field_name)
-        @fields.detect {|field| field.name == field_name}
-      end
-      
-      def <<(field)
-        @fields << field
-      end
-      
-      def field_names
-        @fields.collect {|f| f.name}
-      end
-      
-      def number_of_content_fields
-        @fields.size
-      end
-      
-      def length_of_longest_field_name
-        @length_of_longest_field_name ||= field_names.max_by {|name| name.length }.length
-      end
-      
-      def constraints_description
-        @fields.reject {|field| field.constraint_description.empty? }.map {|field| field.constraint_description}.join(", ")
       end
       
       protected
@@ -59,12 +41,12 @@ module AsciiDataTools
       UNKNOWN_RECORD_TYPE_NAME = "unknown"
       
       def initialize
-        super(UNKNOWN_RECORD_TYPE_NAME, [Field::Field.new("UNKNOWN")])
+        super(UNKNOWN_RECORD_TYPE_NAME, Field::Fields.new([Field::Field.new("UNKNOWN")]))
       end      
     end
     
     class TypeWithFilenameRestrictions < Type
-      def initialize(type_name, fields = [], filename_constraint = Field::FilenameConstraint.new)
+      def initialize(type_name, fields = Field::Fields.new, filename_constraint = Field::FilenameConstraint.new)
         super(type_name, fields)
         @filename_constraint = filename_constraint
       end

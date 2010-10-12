@@ -6,12 +6,12 @@ module AsciiDataTools
       describe Normaliser do
         include RecordTypeHelpers
         before do
-          @fields = [
-             make_field("field1", :length => 3),
-             make_field("field2", :length => 5, :normalised => true),
-             make_field("field3", :length => 3, :normalised => true),
-             make_field("field4", :length => 1)
-           ]
+          @fields = fields do
+             field "field1", :length => 3
+             field "field2", :length => 5, :normalised => true
+             field "field3", :length => 3, :normalised => true
+             field "field4", :length => 1
+           end
            @type = Struct.new(:fields).new(@fields)
            @type.extend(Normaliser)
         end

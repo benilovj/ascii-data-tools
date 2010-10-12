@@ -3,6 +3,42 @@ require File.join(File.dirname(__FILE__), '..', '..', 'spec_helper')
 module AsciiDataTools
   module RecordType
     module Field
+      describe Fields do
+        include RecordTypeHelpers
+
+        before do
+          @fields = fields do
+            field "field100"
+            field "field1"
+            field "field10"
+          end
+        end
+        
+        it "should provide the field names" do
+          @fields.names.should == ["field100", "field1", "field10"]
+        end
+        
+        it "should provide the number of content fields" do
+          @fields.number_of_content_fields.should == 3
+        end
+
+        it "should provide the length of the field with the longest name" do
+          @fields.length_of_longest_field_name.should == 8
+        end
+
+        it "should provide an empty constraints description when there are no constraints" do
+          @fields.constraints_description.should be_empty
+        end
+
+        it "should provide a list of comma-delimited field constraints as the constraints description" do
+          @fields.with_name("field100").should_be_constrained_to("ABC")
+          @fields.constraints_description.should == "field100 = ABC"
+
+          @fields.with_name("field10").should_be_constrained_to("DEF")
+          @fields.constraints_description.should == "field100 = ABC, field10 = DEF"          
+        end
+      end
+      
       describe Field do
         it "should have a name" do
           Field.new("name").name.should == "name"

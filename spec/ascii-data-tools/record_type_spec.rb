@@ -27,7 +27,7 @@ module AsciiDataTools
       
       describe "string representation" do
         it "should not provide a description of the filename constraints if none exists" do
-          TypeWithFilenameRestrictions.new("ABC", []).constraints_description.should be_empty
+          TypeWithFilenameRestrictions.new("ABC").constraints_description.should be_empty
         end
           
         it "should include the file constraint if one exists" do
@@ -70,10 +70,10 @@ module AsciiDataTools
       end
       
       it "should provide a list of comma-delimited field constraints as the constraints description" do
-        @type["field100"].should_be_constrained_to("ABC")
+        @type.field_with_name("field100").should_be_constrained_to("ABC")
         @type.constraints_description.should == "field100 = ABC"
         
-        @type["field10"].should_be_constrained_to("DEF")
+        @type.field_with_name("field10").should_be_constrained_to("DEF")
         @type.constraints_description.should == "field100 = ABC, field10 = DEF"          
       end
     end

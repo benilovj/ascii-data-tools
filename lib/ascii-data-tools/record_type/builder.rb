@@ -15,11 +15,16 @@ module AsciiDataTools
       module TypeBuilder
         include FieldBuilder
         def build_type(type_name, properties = {}, &block)
-          @fields = []
-          instance_eval(&block) unless block.nil?
+          build_fields(&block)
           type = TypeWithFilenameRestrictions.new(type_name, @fields)
           type.filename_should_match(properties[:applies_for_filenames_matching]) unless properties[:applies_for_filenames_matching].nil?
           type
+        end
+
+        def build_fields(&block)
+          @fields = Field::Fields.new
+          instance_eval(&block) unless block.nil?
+          @fields
         end
 
         protected

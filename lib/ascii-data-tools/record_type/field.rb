@@ -1,6 +1,28 @@
 module AsciiDataTools
   module RecordType
     module Field
+      class Fields < Array
+        def with_name(field_name)
+          self.detect {|field| field.name == field_name}
+        end
+        
+        def names
+          self.collect {|f| f.name}
+        end
+        
+        def number_of_content_fields
+          self.size
+        end
+        
+        def length_of_longest_field_name
+          @length_of_longest_field_name ||= names.max_by {|name| name.length }.length
+        end
+        
+        def constraints_description
+          self.reject {|field| field.constraint_description.empty? }.map {|field| field.constraint_description}.join(", ")
+        end
+      end
+      
       class Field
         attr_reader :name
         attr_writer :constraint

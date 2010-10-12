@@ -38,7 +38,7 @@ module AsciiDataTools
           end
         
           it "should normalise fields" do
-            @record_type["RECORD_NUMBER"].should be_normalised
+            @record_type.field_with_name("RECORD_NUMBER").should be_normalised
           end
         end
       end
