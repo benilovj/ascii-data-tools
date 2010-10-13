@@ -10,6 +10,10 @@ module AsciiDataTools
           self.collect {|f| f.name}
         end
         
+        def fields_with(&block)
+          Fields.new(self.select(&block))
+        end
+        
         def number_of_content_fields
           self.size
         end
@@ -20,6 +24,14 @@ module AsciiDataTools
         
         def constraints_description
           self.reject {|field| field.constraint_description.empty? }.map {|field| field.constraint_description}.join(", ")
+        end
+        
+        def should_be_normalised
+          self.each {|field| field.should_be_normalised}
+        end
+        
+        def names_of_normalised_fields
+          self.select {|field| field.normalised?}.map {|field| field.name}.join(", ")
         end
       end
       

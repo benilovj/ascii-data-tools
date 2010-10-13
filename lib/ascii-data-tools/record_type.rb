@@ -23,9 +23,9 @@ module AsciiDataTools
       extend Forwardable
       attr_reader :name
       
-      def_delegator  :@fields, :names, :field_names
-      def_delegator  :@fields, :with_name, :field_with_name
-      def_delegators :@fields, :number_of_content_fields, :length_of_longest_field_name, :constraints_description
+      def_delegator  :fields, :names, :field_names
+      def_delegator  :fields, :with_name, :field_with_name
+      def_delegators :fields, :number_of_content_fields, :length_of_longest_field_name, :constraints_description, :fields_with, :names_of_normalised_fields
       
       def initialize(name, fields = Field::Fields.new)
         @name = name
@@ -64,6 +64,9 @@ module AsciiDataTools
         descriptions = [@filename_constraint.to_s, super].reject {|desc| desc.empty?}
         descriptions.join(", ")
       end
+    end
+
+    module SearchableForFields
     end
 
     class TypeDeterminer

@@ -37,6 +37,25 @@ module AsciiDataTools
           @fields.with_name("field10").should_be_constrained_to("DEF")
           @fields.constraints_description.should == "field100 = ABC, field10 = DEF"          
         end
+        
+        it "should support searching for specific fields" do
+          found_fields = @fields.fields_with {|field| field.name =~ /field\d{2,}/}
+          found_fields.should have(2).items
+          found_fields.with_name("field1").should be_nil
+        end
+        
+        it "should allow mass normalisation" do
+          @fields.should_be_normalised
+          ["field100", "field1", "field10"].each do |field_name|
+            @fields.with_name(field_name).should be_normalised
+          end
+        end
+        
+        it "should provide names of normalised fields" do
+          @fields.with_name("field1").should_be_normalised
+          @fields.with_name("field10").should_be_normalised
+          @fields.names_of_normalised_fields.should == "field1, field10"
+        end
       end
       
       describe Field do

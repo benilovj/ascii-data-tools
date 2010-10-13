@@ -26,12 +26,12 @@ module AsciiDataTools
     end
     
     def headings
-      ["type name", "total length", "constraints"]
+      ["type name", "total length", "constraints", "normalised fields"]
     end
     
     def record_type_summaries
       @record_types.sort_by {|record_type| record_type.total_length_of_fields}.inject([]) do |summaries, record_type|
-        summaries << [record_type.name, record_type.total_length_of_fields, record_type.constraints_description]
+        summaries << [record_type.name, record_type.total_length_of_fields, record_type.constraints_description, record_type.names_of_normalised_fields]
       end
     end
   end  
