@@ -14,7 +14,7 @@ module AsciiDataTools
       include Normaliser::Normaliser
       
       def total_length_of_fields
-        @total_length ||= @fields.inject(0) {|sum, field| sum + field.length}
+        @total_length ||= fields.inject(0) {|sum, field| sum + field.length}
       end
     end
     
