@@ -10,19 +10,19 @@ module AsciiDataTools
           field 'f2', :length => 1
         end.filename_should_match(/abc[.]gz/)
         
-        type.should be_matching("XYZ\n", "abc.gz")
-        type.should_not be_matching("XY\n", "abc.gz")
-        type.should_not be_matching("XYZ\n", "xyz.gz")
-        type.should_not be_matching("XXX\n", "xyz.gz")
+        type.should be_matching(:ascii_string => "XYZ\n", :filename => "abc.gz")
+        type.should_not be_matching(:ascii_string => "XY\n", :filename => "abc.gz")
+        type.should_not be_matching(:ascii_string => "XYZ\n", :filename => "xyz.gz")
+        type.should_not be_matching(:ascii_string => "XXX\n", :filename => "xyz.gz")
       end
       
       it "can accept another filename restriction" do
         type = type("ABC").filename_should_match(/abc[.]gz/)
-        type.should be_matching("", "abc.gz")
+        type.should be_matching(:ascii_string => "", :filename => "abc.gz")
         
         type.filename_should_match(/xyz[.]gz/)
-        type.should_not be_matching("", "abc.gz")
-        type.should be_matching("", "xyz.gz")
+        type.should_not be_matching(:ascii_string => "", :filename => "abc.gz")
+        type.should be_matching(:ascii_string => "", :filename => "xyz.gz")
       end
       
       describe "string representation" do
@@ -134,7 +134,7 @@ module AsciiDataTools
         determiner = TypeDeterminer.new(all_types)
         determiner.determine_type_for("record 1").should == first_type
 
-        first_type.should_receive(:matching?).with("record 2", nil).once.ordered.and_return(false)
+        first_type.should_receive(:matching?).with(:ascii_string => "record 2", :filename => nil).once.ordered.and_return(false)
 
         all_types.should_receive(:find_for_record).with("record 2", nil).ordered.and_return(second_type)
 

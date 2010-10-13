@@ -11,8 +11,8 @@ module AsciiDataTools
 
         it "should create a type which matches only for specific filenames (if given)" do
           type = build_type("ABC", :applies_for_filenames_matching => /ABC/)
-          type.should be_matching("", "ABC.gz")
-          type.should_not be_matching("", "XYZ.gz")
+          type.should be_matching(:ascii_string => "", :filename => "ABC.gz")
+          type.should_not be_matching(:ascii_string => "", :filename => "XYZ.gz")
         end
 
         context "for fixed-length types" do

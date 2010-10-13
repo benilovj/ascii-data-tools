@@ -54,8 +54,8 @@ module AsciiDataTools
         @filename_constraint = filename_constraint
       end
       
-      def matching?(ascii_string, context_filename = nil)
-        @filename_constraint.satisfied_by?(context_filename) and super(ascii_string)
+      def matching?(properties)
+        @filename_constraint.satisfied_by?(properties[:filename]) and super(properties[:ascii_string])
       end
       
       def filename_should_match(regexp)
@@ -115,7 +115,7 @@ module AsciiDataTools
       end
 
       def find_for_record(encoded_record_string, context_filename)
-        @types.detect {|type| type.matching?(encoded_record_string, context_filename) }
+        @types.detect {|type| type.matching?(:ascii_string => encoded_record_string, :filename => context_filename) }
       end
       
       def for_names_matching(matcher, &block)
