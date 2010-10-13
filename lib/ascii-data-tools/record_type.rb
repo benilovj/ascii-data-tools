@@ -25,6 +25,7 @@ module AsciiDataTools
       
       def_delegator  :fields, :names, :field_names
       def_delegator  :fields, :with_name, :field_with_name
+      def_delegator  :fields, :with_index, :field_with_index
       def_delegators :fields, :number_of_content_fields, :length_of_longest_field_name, :constraints_description, :fields_with, :names_of_normalised_fields
       
       def initialize(name, fields = Field::Fields.new)

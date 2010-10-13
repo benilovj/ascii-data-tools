@@ -58,6 +58,7 @@ Feature: tools for plugins
     Given the following configuration:
       """
       for_names_matching(/EXAMPLE\d/) {|type| type.fields_with {|field| field.name =~ /RECORD_/}.should_be_normalised }
+      type("EXAMPLE01").field_with_index(2).should_be_normalised
       """
     When the record type configuration is printed
     Then it should look like this:
@@ -66,7 +67,7 @@ Feature: tools for plugins
       | type name | total length | constraints             | normalised fields      |
       +-----------+--------------+-------------------------+------------------------+
       | EXAMPLE02 | 44           | RECORD_TYPE = EXAMPLE02 | RECORD_TYPE, TIMESTAMP |
-      | EXAMPLE01 | 49           | RECORD_TYPE = EXAMPLE01 | RECORD_TYPE            |
+      | EXAMPLE01 | 49           | RECORD_TYPE = EXAMPLE01 | RECORD_TYPE, USAGE     |
       +-----------+--------------+-------------------------+------------------------+
 
       """

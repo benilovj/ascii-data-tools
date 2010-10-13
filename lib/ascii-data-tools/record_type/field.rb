@@ -1,17 +1,24 @@
 module AsciiDataTools
   module RecordType
     module Field
-      class Fields < Array
+      module GreppableFields
         def with_name(field_name)
           self.detect {|field| field.name == field_name}
         end
         
-        def names
-          self.collect {|f| f.name}
-        end
-        
         def fields_with(&block)
           Fields.new(self.select(&block))
+        end
+        
+        def with_index(index)
+          self[index-1]
+        end
+      end
+      
+      class Fields < Array
+        include GreppableFields
+        def names
+          self.collect {|f| f.name}
         end
         
         def number_of_content_fields

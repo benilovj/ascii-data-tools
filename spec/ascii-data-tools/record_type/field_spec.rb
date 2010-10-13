@@ -56,6 +56,10 @@ module AsciiDataTools
           @fields.with_name("field10").should_be_normalised
           @fields.names_of_normalised_fields.should == "field1, field10"
         end
+        
+        it "should find fields by index" do
+          @fields.with_index(2).name.should == "field1"
+        end
       end
       
       describe Field do
