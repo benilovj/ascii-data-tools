@@ -3,11 +3,11 @@ require 'set'
 module AsciiDataTools
   module Record    
     class Record
-      attr_reader :type, :values
+      attr_reader :type
       
-      def initialize(type, values)
+      def initialize(type, content_values)
         @type = type
-        @values = values
+        @values_by_type = {:content => content_values}
       end
       
       def [](requested_field_name)
@@ -21,7 +21,11 @@ module AsciiDataTools
       end
       
       def to_a
-        @type.field_names.zip(@values)
+        @type.field_names.zip(values)
+      end
+      
+      def values
+        @values_by_type[:content]
       end
       
       def encode
@@ -39,7 +43,7 @@ module AsciiDataTools
       
       protected
       def field_names_and_values
-        @type.field_names.zip(@values)
+        @type.field_names.zip(values)
       end
     end
   end

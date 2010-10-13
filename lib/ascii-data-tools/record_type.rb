@@ -28,13 +28,15 @@ module AsciiDataTools
       def_delegator  :fields, :with_index, :field_with_index
       def_delegators :fields, :number_of_content_fields, :length_of_longest_field_name, :constraints_description, :fields_with, :names_of_normalised_fields
       
-      def initialize(name, fields = Field::Fields.new)
+      def initialize(name, content_fields = Field::Fields.new)
         @name = name
-        @fields = fields
+        @fields_by_type = {:content => content_fields}
       end
       
       protected
-      attr_reader :fields
+      def fields
+        @fields_by_type[:content]
+      end
     end
     
     class UnknownType < Type
@@ -65,9 +67,6 @@ module AsciiDataTools
         descriptions = [@filename_constraint.to_s, super].reject {|desc| desc.empty?}
         descriptions.join(", ")
       end
-    end
-
-    module SearchableForFields
     end
 
     class TypeDeterminer
