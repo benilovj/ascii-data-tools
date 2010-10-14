@@ -74,7 +74,7 @@ module AsciiDataTools
       end
       
       def filter(record)
-        type = @type_determiner.determine_type_for(record, @filename)
+        type = @type_determiner.determine_type_for(:ascii_string => record, :filename => @filename)
         decoded_record = type.decode(record)
         @formatter.format(decoded_record)
       end
@@ -87,7 +87,7 @@ module AsciiDataTools
       end
       
       def filter(record)
-        type = @type_determiner.determine_type_for(record, @filename)
+        type = @type_determiner.determine_type_for(:ascii_string => record, :filename => @filename)
         type.normalise(record)
       end
     end

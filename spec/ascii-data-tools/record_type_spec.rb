@@ -112,16 +112,16 @@ module AsciiDataTools
     describe TypeDeterminer do
       it "should determine the type that matches" do
         all_types = mock(RecordTypeRepository, :find_for_record => mock(Type, :name => "ABC"))
-        TypeDeterminer.new(all_types).determine_type_for("any encoded record").name.should == "ABC"
+        TypeDeterminer.new(all_types).determine_type_for(:ascii_string => "any encoded record").name.should == "ABC"
       end
       
       it "should accept the context filename as an optional parameter" do        
         all_types = mock(RecordTypeRepository, :find_for_record => mock(Type, :name => "ABC"))
-        TypeDeterminer.new(all_types).determine_type_for("any encoded record", "context filename").name.should == "ABC"
+        TypeDeterminer.new(all_types).determine_type_for(:ascii_string => "any encoded record", :filename => "context filename").name.should == "ABC"
       end
       
       it "should determine the type to be unknown when no matching real type can be found" do
-        TypeDeterminer.new(mock(RecordTypeRepository, :find_for_record => nil)).determine_type_for("any encoded record").should be_an(UnknownType)
+        TypeDeterminer.new(mock(RecordTypeRepository, :find_for_record => nil)).determine_type_for(:ascii_string => "any encoded record").should be_an(UnknownType)
       end
       
       it "should cache previously matched types and try to match them first" do
@@ -129,16 +129,16 @@ module AsciiDataTools
         second_type = mock("type 2")
         
         all_types = mock(RecordTypeRepository)
-        all_types.should_receive(:find_for_record).with("record 1", nil).ordered.and_return(first_type)
+        all_types.should_receive(:find_for_record).with(:ascii_string => "record 1").ordered.and_return(first_type)
 
         determiner = TypeDeterminer.new(all_types)
-        determiner.determine_type_for("record 1").should == first_type
+        determiner.determine_type_for(:ascii_string => "record 1").should == first_type
 
-        first_type.should_receive(:matching?).with(:ascii_string => "record 2", :filename => nil).once.ordered.and_return(false)
+        first_type.should_receive(:matching?).with(:ascii_string => "record 2").once.ordered.and_return(false)
 
-        all_types.should_receive(:find_for_record).with("record 2", nil).ordered.and_return(second_type)
+        all_types.should_receive(:find_for_record).with(:ascii_string => "record 2").ordered.and_return(second_type)
 
-        determiner.determine_type_for("record 2").should == second_type
+        determiner.determine_type_for(:ascii_string => "record 2").should == second_type
       end
     end
     
@@ -166,7 +166,7 @@ module AsciiDataTools
       it "should find record types which match a certain record" do
         repo = RecordTypeRepository.new
         repo << mock(Type, :name => "ABC", :matching? => false) << mock(Type, :name => "DEF", :matching? => :true)
-        repo.find_for_record("some record", "context").name.should == "DEF"
+        repo.find_for_record(:ascii_string => "some record", :filename => "context").name.should == "DEF"
       end
       
       it "should store each type only once" do
