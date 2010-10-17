@@ -74,8 +74,9 @@ module AsciiDataTools
       end
       
       def filter(record)
-        type = @type_determiner.determine_type_for(:ascii_string => record, :filename => @filename)
-        decoded_record = type.decode(record)
+        encoded_record = {:ascii_string => record, :filename => @filename}
+        type = @type_determiner.determine_type_for(encoded_record)
+        decoded_record = type.decode(encoded_record)
         @formatter.format(decoded_record)
       end
     end

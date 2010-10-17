@@ -68,10 +68,21 @@ module AsciiDataTools
         end
       
         context "a constrained field" do
+          before do
+            @field = Field.new("name")
+            @field.should_be_constrained_to("abc")
+          end
+          
           it "should provide a text description of the constraint" do
-            field = Field.new("name")
-            field.should_be_constrained_to("abc")
-            field.constraint_description.should == "name = abc"
+            @field.constraint_description.should == "name = abc"
+          end
+          
+          it "should validate input" do
+            @field.should be_a_valid_input("abc")
+          end
+          
+          it "should invalidate input" do
+            @field.should_not be_a_valid_input("def")
           end
         end
       end
@@ -90,6 +101,12 @@ module AsciiDataTools
           field.constraint = mock("field constraint", :extend_regexp_string_for_matching => "xxxabc")
           field.extend_regexp_string_for_matching("xxx").should == "xxxabc"
         end      
+      end
+    
+      describe NoConstraint do
+        it "should always be satisfied" do
+          NoConstraint.new.should be_satisfied_by(Object.new)
+        end
       end
     
       describe FixedLengthConstraint do
@@ -128,33 +145,6 @@ module AsciiDataTools
       
         it "should have an appropriate string representation" do
           RegexpConstraint.new(/ABC/).to_s.should == "=~ /ABC/"
-        end
-      end
-    
-      describe FilenameConstraint do
-        context "by default" do
-          it "should match any filename" do
-            should be_satisfied_by("abc")
-            should be_satisfied_by("XXX")
-            should be_satisfied_by(nil)
-          end
-        
-          it "should be represented by an empty string" do
-            FilenameConstraint.new.to_s.should be_empty
-          end
-        end
-      
-        context "when defined" do
-          it "should print the regexp in the string representation" do
-            FilenameConstraint.satisfied_by_filenames_matching(/ABC[.]\d\d[.]gz/).to_s.should == 'Filename =~ /ABC[.]\d\d[.]gz/'
-          end
-        
-          it "should be satisfied by correctly-named filenames" do
-            constraint = FilenameConstraint.satisfied_by_filenames_matching(/ABC[.]\d\d[.]gz/)
-            constraint.should be_satisfied_by("ABC.12.gz")
-            constraint.should_not be_satisfied_by("ABC.123.gz")
-            constraint.should_not be_satisfied_by(nil)
-          end
         end
       end
     end

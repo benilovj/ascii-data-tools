@@ -11,27 +11,39 @@ module AsciiDataTools
             make_field("field1",   :length => 5),
             make_field("field10",  :length => 1)
           ]
-          @type = Struct.new(:fields).new(@fields)
+          @type = Struct.new(:content_fields).new(@fields)
+          @type.extend(RecordTypeHelpers)
+          def @type.field_with_name(name)
+            make_field(:filename, :constrained_to => /abc/)
+          end
           @type.extend(RecordDecoder)
         end
       
         it "should know whether a given string is decodable" do
-          @type.should be_able_to_decode("ABC12345\n")
+          @type.should be_able_to_decode(:ascii_string => "ABC12345\n")
         end
       
         it "should decode records correctly" do
-          @type.decode("XYZ12345\n").values.should == ["XYZ", "12345", "\n"]
+          @type.decode(:ascii_string => "XYZ12345\n").values.should == ["XYZ", "12345", "\n"]
         end
       
         it "should take into account constraints that are set on the fields" do
           @fields[0].should_be_constrained_to("ABC")
-          @type.should be_able_to_decode("ABC12345\n")
-          @type.should_not be_able_to_decode("XYZ12345\n")
+          @type.should be_able_to_decode(:ascii_string => "ABC12345\n")
+          @type.should_not be_able_to_decode(:ascii_string => "XYZ12345\n")
         end
       
         it "should not match ascii strings that don't have the same length as the individual fields" do
-          @type.should_not be_able_to_decode("ABC1234\n")
-          @type.should_not be_able_to_decode("ABC123456\n")
+          @type.should_not be_able_to_decode(:ascii_string => "ABC1234\n")
+          @type.should_not be_able_to_decode(:ascii_string => "ABC123456\n")
+        end
+        
+        it "should not be able to decode if the filename field is not matching" do
+          # @type.field_with_name(:filename).should_be_constrained_to(/abc/)
+          
+          @type.should be_able_to_decode(:ascii_string => "ABC12345\n")
+          @type.should be_able_to_decode(:ascii_string => "ABC12345\n", :filename => "abc")
+          @type.should_not be_able_to_decode(:ascii_string => "ABC12345\n", :filename => "def")
         end
       end
 
@@ -39,7 +51,7 @@ module AsciiDataTools
         it "should decode the entire ascii string into the UNKNOWN field" do
           decoder = Struct.new(:field_names).new(["UNKNOWN"])
           decoder.extend(UnknownRecordDecoder)
-          record = decoder.decode("any string\n")
+          record = decoder.decode(:ascii_string => "any string\n")
           record["UNKNOWN"].should == "any string\n"
         end
       end

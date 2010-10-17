@@ -1,4 +1,4 @@
-require 'set'
+  require 'set'
 require 'forwardable'
 require 'ascii-data-tools/record_type/field'
 require 'ascii-data-tools/record_type/builder'
@@ -24,18 +24,38 @@ module AsciiDataTools
       attr_reader :name
       
       def_delegator  :fields, :names, :field_names
-      def_delegator  :fields, :with_name, :field_with_name
       def_delegator  :fields, :with_index, :field_with_index
-      def_delegators :fields, :number_of_content_fields, :length_of_longest_field_name, :constraints_description, :fields_with, :names_of_normalised_fields
       
       def initialize(name, content_fields = Field::Fields.new)
         @name = name
-        @fields_by_type = {:content => content_fields}
+        @fields_by_type = {:content => content_fields, :meta => make_meta_fields}
+      end
+      
+      def field_with_name(name)
+        all_fields.with_name(name)
+      end
+      
+      def method_missing(method_name, *args, &block)
+        content_fields.send(method_name, *args, &block)
+      end
+      
+      def filename_should_match(value)
+        field_with_name(:filename).should_be_constrained_to(value)
       end
       
       protected
-      def fields
+      def content_fields
         @fields_by_type[:content]
+      end
+
+      alias :fields :content_fields
+      
+      def make_meta_fields
+        Field::Fields.new([Field::Field.new(:filename)])
+      end
+      
+      def all_fields
+        Field::Fields.new(@fields_by_type[:content] + @fields_by_type[:meta])
       end
     end
     
@@ -47,27 +67,6 @@ module AsciiDataTools
         super(UNKNOWN_RECORD_TYPE_NAME, Field::Fields.new([Field::Field.new("UNKNOWN")]))
       end      
     end
-    
-    class TypeWithFilenameRestrictions < Type
-      def initialize(type_name, fields = Field::Fields.new, filename_constraint = Field::FilenameConstraint.new)
-        super(type_name, fields)
-        @filename_constraint = filename_constraint
-      end
-      
-      def matching?(encoded_record)
-        @filename_constraint.satisfied_by?(encoded_record[:filename]) and super(encoded_record[:ascii_string])
-      end
-      
-      def filename_should_match(regexp)
-        @filename_constraint = Field::FilenameConstraint.satisfied_by_filenames_matching(regexp)
-        self
-      end
-      
-      def constraints_description
-        descriptions = [@filename_constraint.to_s, super].reject {|desc| desc.empty?}
-        descriptions.join(", ")
-      end
-    end
 
     class TypeDeterminer
       def initialize(type_repo = RecordTypeRepository.new)
@@ -77,8 +76,8 @@ module AsciiDataTools
 
       def determine_type_for(encoded_record)
         matching_type = 
-          @previously_matched_types.find_for_record(encoded_record) || 
-          @all_types.find_for_record(encoded_record)
+          @previously_matched_types.identify_type_for(encoded_record) || 
+          @all_types.identify_type_for(encoded_record)
         if matching_type.nil?
           return UnknownType.new
         else
@@ -114,8 +113,8 @@ module AsciiDataTools
         @types.each(&block)
       end
 
-      def find_for_record(encoded_record)
-        @types.detect {|type| type.matching?(encoded_record) }
+      def identify_type_for(encoded_record)
+        @types.detect {|type| type.able_to_decode?(encoded_record) }
       end
       
       def for_names_matching(matcher, &block)

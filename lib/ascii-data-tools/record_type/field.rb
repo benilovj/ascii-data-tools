@@ -62,7 +62,7 @@ module AsciiDataTools
       
         def constraint_description
           unless @constraint.to_s.empty?
-            name + " " + @constraint.to_s
+            name.to_s + " " + @constraint.to_s
           else
             ""
           end
@@ -74,6 +74,10 @@ module AsciiDataTools
           else
             @constraint = OneOfConstraint.new(value)
           end
+        end
+        
+        def valid_input?(value)
+          @constraint.satisfied_by?(value)
         end
       end
     
@@ -95,10 +99,20 @@ module AsciiDataTools
           regexp_string
         end
       
+        def satisfied_by?(string)
+          true
+        end
+      
         def to_s; ""; end
       end
     
-      class FixedLengthConstraint
+      class Constraint
+        def satisfied_by?(string)
+          string =~ Regexp.new(extend_regexp_string_for_matching(""))
+        end
+      end
+    
+      class FixedLengthConstraint < Constraint
         def initialize(length)
           @length = length
         end
@@ -110,7 +124,7 @@ module AsciiDataTools
         def to_s; ""; end
       end
     
-      class OneOfConstraint
+      class OneOfConstraint < Constraint
         def initialize(*possible_values)
           @possible_values = possible_values.flatten
         end
@@ -128,7 +142,7 @@ module AsciiDataTools
         end
       end
     
-      class RegexpConstraint
+      class RegexpConstraint < Constraint
         def initialize(regexp_that_must_match)
           @regexp_that_must_match = regexp_that_must_match
         end
@@ -143,30 +157,6 @@ module AsciiDataTools
 
         def to_s
           "=~ #{@regexp_that_must_match.inspect}"
-        end
-      end
-    
-      class FilenameConstraint
-        def initialize(constraint = nil)
-          @filename_constraint = constraint
-        end
-
-        def satisfied_by?(string)
-          @filename_constraint.nil? or @filename_constraint.satisfied_by?(string)
-        end
-
-        def to_s
-          unless @filename_constraint.nil?
-            "Filename #{@filename_constraint.to_s}"
-          else
-            ""
-          end
-        end
-
-        class << self
-          def satisfied_by_filenames_matching(regexp)
-            new(RegexpConstraint.new(regexp))
-          end
         end
       end
     end

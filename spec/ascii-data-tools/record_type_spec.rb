@@ -2,42 +2,6 @@ require File.join(File.dirname(__FILE__), '..', 'spec_helper')
 
 module AsciiDataTools
   module RecordType
-    describe TypeWithFilenameRestrictions do
-      include RecordTypeHelpers
-      it "should match only when both the filename and field restrictions are satisfied" do
-        type = type("ABC") do
-          field 'f1', :length => 3
-          field 'f2', :length => 1
-        end.filename_should_match(/abc[.]gz/)
-        
-        type.should be_matching(:ascii_string => "XYZ\n", :filename => "abc.gz")
-        type.should_not be_matching(:ascii_string => "XY\n", :filename => "abc.gz")
-        type.should_not be_matching(:ascii_string => "XYZ\n", :filename => "xyz.gz")
-        type.should_not be_matching(:ascii_string => "XXX\n", :filename => "xyz.gz")
-      end
-      
-      it "can accept another filename restriction" do
-        type = type("ABC").filename_should_match(/abc[.]gz/)
-        type.should be_matching(:ascii_string => "", :filename => "abc.gz")
-        
-        type.filename_should_match(/xyz[.]gz/)
-        type.should_not be_matching(:ascii_string => "", :filename => "abc.gz")
-        type.should be_matching(:ascii_string => "", :filename => "xyz.gz")
-      end
-      
-      describe "string representation" do
-        it "should not provide a description of the filename constraints if none exists" do
-          TypeWithFilenameRestrictions.new("ABC").constraints_description.should be_empty
-        end
-          
-        it "should include the file constraint if one exists" do
-          type = type("ABC").filename_should_match(/abc[.]gz/)
-          
-          type.constraints_description.should include('/abc[.]gz/')
-        end
-      end
-    end
-    
     describe Type do
       include RecordTypeHelpers
       
@@ -76,6 +40,15 @@ module AsciiDataTools
         @type.field_with_name("field10").should_be_constrained_to("DEF")
         @type.constraints_description.should == "field100 = ABC, field10 = DEF"          
       end
+      
+      it "should have an inbuilt filename meta field" do
+        @type.field_with_name(:filename).should_not be_nil
+      end
+      
+      it "should provide a shortcut for constraining the filename" do
+        @type.filename_should_match /abc/
+        @type.field_with_name(:filename).constraint_description.should == "filename =~ /abc/"
+      end
     end
     
     describe FixedLengthType do
@@ -104,24 +77,24 @@ module AsciiDataTools
       end
       
       it "should decode the entire ascii string into the UNKNOWN field" do
-        record = UnknownType.new.decode("any string\n")
+        record = UnknownType.new.decode(:ascii_string => "any string\n")
         record["UNKNOWN"].should == "any string\n"
       end
     end
     
     describe TypeDeterminer do
       it "should determine the type that matches" do
-        all_types = mock(RecordTypeRepository, :find_for_record => mock(Type, :name => "ABC"))
+        all_types = mock(RecordTypeRepository, :identify_type_for => mock(Type, :name => "ABC"))
         TypeDeterminer.new(all_types).determine_type_for(:ascii_string => "any encoded record").name.should == "ABC"
       end
       
       it "should accept the context filename as an optional parameter" do        
-        all_types = mock(RecordTypeRepository, :find_for_record => mock(Type, :name => "ABC"))
+        all_types = mock(RecordTypeRepository, :identify_type_for => mock(Type, :name => "ABC"))
         TypeDeterminer.new(all_types).determine_type_for(:ascii_string => "any encoded record", :filename => "context filename").name.should == "ABC"
       end
       
       it "should determine the type to be unknown when no matching real type can be found" do
-        TypeDeterminer.new(mock(RecordTypeRepository, :find_for_record => nil)).determine_type_for(:ascii_string => "any encoded record").should be_an(UnknownType)
+        TypeDeterminer.new(mock(RecordTypeRepository, :identify_type_for => nil)).determine_type_for(:ascii_string => "any encoded record").should be_an(UnknownType)
       end
       
       it "should cache previously matched types and try to match them first" do
@@ -129,14 +102,14 @@ module AsciiDataTools
         second_type = mock("type 2")
         
         all_types = mock(RecordTypeRepository)
-        all_types.should_receive(:find_for_record).with(:ascii_string => "record 1").ordered.and_return(first_type)
+        all_types.should_receive(:identify_type_for).with(:ascii_string => "record 1").ordered.and_return(first_type)
 
         determiner = TypeDeterminer.new(all_types)
         determiner.determine_type_for(:ascii_string => "record 1").should == first_type
 
-        first_type.should_receive(:matching?).with(:ascii_string => "record 2").once.ordered.and_return(false)
+        first_type.should_receive(:able_to_decode?).with(:ascii_string => "record 2").once.ordered.and_return(false)
 
-        all_types.should_receive(:find_for_record).with(:ascii_string => "record 2").ordered.and_return(second_type)
+        all_types.should_receive(:identify_type_for).with(:ascii_string => "record 2").ordered.and_return(second_type)
 
         determiner.determine_type_for(:ascii_string => "record 2").should == second_type
       end
@@ -165,8 +138,8 @@ module AsciiDataTools
       
       it "should find record types which match a certain record" do
         repo = RecordTypeRepository.new
-        repo << mock(Type, :name => "ABC", :matching? => false) << mock(Type, :name => "DEF", :matching? => :true)
-        repo.find_for_record(:ascii_string => "some record", :filename => "context").name.should == "DEF"
+        repo << mock(Type, :name => "ABC", :able_to_decode? => false) << mock(Type, :name => "DEF", :able_to_decode? => :true)
+        repo.identify_type_for(:ascii_string => "some record", :filename => "context").name.should == "DEF"
       end
       
       it "should store each type only once" do

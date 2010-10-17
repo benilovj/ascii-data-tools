@@ -16,8 +16,9 @@ module AsciiDataTools
         include FieldBuilder
         def build_type(type_name, properties = {}, &block)
           build_fields(&block)
-          type = TypeWithFilenameRestrictions.new(type_name, @fields)
-          type.filename_should_match(properties[:applies_for_filenames_matching]) unless properties[:applies_for_filenames_matching].nil?
+          type = Type.new(type_name, @fields)
+          type.field_with_name(:filename).should_be_constrained_to(properties[:applies_for_filenames_matching])
+          # type.filename_should_match(properties[:applies_for_filenames_matching]) unless properties[:applies_for_filenames_matching].nil?
           type
         end
 
