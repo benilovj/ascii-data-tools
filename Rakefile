@@ -38,28 +38,12 @@ Spec::Rake::SpecTask.new(:spec) do |t|
   t.spec_files = FileList['spec/**/*_spec.rb']
 end
 
-spec = Gem::Specification.new do |s|
-  s.platform = Gem::Platform::RUBY
-  s.summary = "A tool for decoding and modifying ASCII CDRs."
-  s.name = 'ascii-data-tools'
-  s.version = "0.3"
-  s.author = 'Jake Benilov'
-  s.email = 'benilov@gmail.com'
-  s.homepage = 'http://github.com/benilovj/ascii-data-tools'
-  s.requirements << 'none'
-  s.require_path = 'lib'
-  s.bindir = 'bin'
-  s.executables = ['ascii-data-cat', 'ascii-data-norm', 'ascii-data-tools-config', 'ascii-data-qdiff', 'ascii-data-edit']
-  s.files = FileList["{lib,spec,features}/**/*"].to_a + ['Rakefile']
-  s.description = s.summary
+task :build do
+  system "gem build ascii-data-tools.gemspec"
 end
-
-Rake::GemPackageTask.new(spec) do |pkg|
-    pkg.need_tar = false
-end
-
-task :install_gem => :package do
-  `sudo gem install pkg/*.gem --no-ri --no-rdoc`
+ 
+task :install_gem => :build do
+  `sudo gem install *.gem --no-ri --no-rdoc`
 end
 
 task :default => :install_gem
