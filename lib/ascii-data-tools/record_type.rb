@@ -44,6 +44,8 @@ module AsciiDataTools
       end
       
       protected
+      attr_reader :fields_by_type
+      
       def content_fields
         @fields_by_type[:content]
       end

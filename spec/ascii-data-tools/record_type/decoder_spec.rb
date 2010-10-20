@@ -11,11 +11,8 @@ module AsciiDataTools
             make_field("field1",   :length => 5),
             make_field("field10",  :length => 1)
           ]
-          @type = Struct.new(:content_fields).new(@fields)
+          @type = Struct.new(:content_fields, :fields_by_type).new(@fields, {:meta => fields do field(:filename, :constrained_to => /abc/) end})
           @type.extend(RecordTypeHelpers)
-          def @type.field_with_name(name)
-            make_field(:filename, :constrained_to => /abc/)
-          end
           @type.extend(RecordDecoder)
         end
       
@@ -28,7 +25,7 @@ module AsciiDataTools
         end
       
         it "should take into account constraints that are set on the fields" do
-          @fields[0].should_be_constrained_to("ABC")
+          @type.content_fields[0].should_be_constrained_to("ABC")
           @type.should be_able_to_decode(:ascii_string => "ABC12345\n")
           @type.should_not be_able_to_decode(:ascii_string => "XYZ12345\n")
         end
@@ -39,8 +36,6 @@ module AsciiDataTools
         end
         
         it "should not be able to decode if the filename field is not matching" do
-          # @type.field_with_name(:filename).should_be_constrained_to(/abc/)
-          
           @type.should be_able_to_decode(:ascii_string => "ABC12345\n")
           @type.should be_able_to_decode(:ascii_string => "ABC12345\n", :filename => "abc")
           @type.should_not be_able_to_decode(:ascii_string => "ABC12345\n", :filename => "def")
@@ -55,7 +50,6 @@ module AsciiDataTools
           record["UNKNOWN"].should == "any string\n"
         end
       end
-
     end    
   end
 end
