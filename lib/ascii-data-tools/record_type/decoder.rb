@@ -33,7 +33,11 @@ module AsciiDataTools
         
         protected
         def meta_fields_valid?(encoded_record)
-          encoded_record[:filename].nil? or fields_by_type[:meta].with_name(:filename).valid_input?(encoded_record[:filename])
+          encoded_record[:filename].nil? or filename_field.valid_input?(encoded_record[:filename])
+        end
+        
+        def filename_field
+          @filename_field ||= fields_by_type[:meta].with_name(:filename)
         end
       end
     
