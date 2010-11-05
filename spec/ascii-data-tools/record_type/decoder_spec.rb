@@ -13,7 +13,7 @@ module AsciiDataTools
           ]
           @type = Struct.new(:content_fields, :fields_by_type).new(@fields, {:meta => fields do field(:filename, :constrained_to => /abc/) end})
           @type.extend(RecordTypeHelpers)
-          @type.extend(RecordDecoder)
+          @type.extend(FixedLengthRecordDecoder)
         end
       
         it "should know whether a given string is decodable" do
@@ -41,7 +41,25 @@ module AsciiDataTools
           @type.should_not be_able_to_decode(:ascii_string => "ABC12345\n", :filename => "def")
         end
       end
-
+      
+      describe CsvRecordDecoder do
+        include RecordTypeHelpers
+        before do
+          @fields = [
+            make_field("field1"),
+            make_field("field2"),
+            make_field("field3")
+          ]
+          @type = Struct.new(:content_fields).new(@fields)
+          @type.stub!(:field_with_name).with(:divider).and_return(mock("divider field", :value => ";"))
+          @type.extend(CsvRecordDecoder)
+        end
+        
+        it "should decode records correctly" do
+          @type.decode(:ascii_string => "X;Y;Z\n").values.should == ["X", "Y", "Z"]
+        end
+      end
+      
       describe UnknownRecordDecoder do
         it "should decode the entire ascii string into the UNKNOWN field" do
           decoder = Struct.new(:field_names).new(["UNKNOWN"])

@@ -1,4 +1,4 @@
-  require 'set'
+require 'set'
 require 'forwardable'
 require 'ascii-data-tools/record_type/field'
 require 'ascii-data-tools/record_type/builder'
@@ -9,8 +9,8 @@ require 'ascii-data-tools/record_type/encoder'
 module AsciiDataTools
   module RecordType
     module FixedLengthType
-      include Decoder::RecordDecoder
-      include Encoder::RecordEncoder
+      include Decoder::FixedLengthRecordDecoder
+      include Encoder::FixedLengthRecordEncoder
       include Normaliser::Normaliser
       
       def total_length_of_fields
@@ -18,8 +18,12 @@ module AsciiDataTools
       end
     end
     
+    module CsvType
+      include Decoder::CsvRecordDecoder
+      include Encoder::CsvRecordEncoder
+    end
+    
     class Type
-      include FixedLengthType
       extend Forwardable
       attr_reader :name
       
@@ -53,7 +57,7 @@ module AsciiDataTools
       alias :fields :content_fields
       
       def make_meta_fields
-        Field::Fields.new([Field::Field.new(:filename)])
+        Field::Fields.new([Field::Field.new(:filename), Field::ConstantField.new(:divider)])
       end
       
       def all_fields

@@ -102,7 +102,15 @@ module AsciiDataTools
           field.extend_regexp_string_for_matching("xxx").should == "xxxabc"
         end      
       end
-    
+      
+      describe ConstantField do
+        it "should be able to store a value" do
+          field = ConstantField.new("XXX")
+          field.value = "abc"
+          field.value.should == "abc"
+        end
+      end
+      
       describe NoConstraint do
         it "should always be satisfied" do
           NoConstraint.new.should be_satisfied_by(Object.new)

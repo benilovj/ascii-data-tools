@@ -80,7 +80,11 @@ module AsciiDataTools
           @constraint.satisfied_by?(value)
         end
       end
-    
+      
+      class ConstantField < Field
+        attr_accessor :value
+      end
+      
       class FixedLengthField < Field
         attr_reader :length
       

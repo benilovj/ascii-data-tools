@@ -25,6 +25,10 @@ module AsciiDataTools
             end
           end
 
+          it "should really build a fixed-length type" do
+            @record_type.should be_a(AsciiDataTools::RecordType::FixedLengthType)
+          end
+
           it "should have the correct fields" do
             @record_type.field_names.should == ["RECORD_TYPE", "A_NUMBER", "RECORD_NUMBER", "END_OF_RECORD"]
           end
@@ -39,6 +43,24 @@ module AsciiDataTools
         
           it "should normalise fields" do
             @record_type.field_with_name("RECORD_NUMBER").should be_normalised
+          end
+        end
+      
+        context "for csv types" do
+          before do
+            @record_type = build_type("ABC", :family => "csv", :divider => ";") do
+              field "RECORD_TYPE"
+              field "A_NUMBER"
+              field "RECORD_NUMBER"
+            end
+          end
+          
+          it "should really build a csv type" do
+            @record_type.should be_a(AsciiDataTools::RecordType::CsvType)
+          end
+          
+          it "should save the divider" do
+            @record_type.field_with_name(:divider).value.should == ";"
           end
         end
       end
