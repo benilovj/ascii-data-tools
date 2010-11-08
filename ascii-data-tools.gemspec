@@ -2,7 +2,7 @@ require 'rake'
 
 Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
-  s.required_ruby_version = '>= 1.9.1'
+  s.required_ruby_version = '>= 1.8.7'
   s.summary = "A tool for decoding and modifying ASCII CDRs."
   s.name = 'ascii-data-tools'
   s.version = "0.3"

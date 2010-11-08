@@ -3,6 +3,7 @@ require File.join(File.dirname(__FILE__), '..', 'filter_helper')
 
 require 'ascii-data-tools/configuration'
 require 'ascii-data-tools/filter'
+require 'ascii-data-tools/record_type'
 require 'stringio'
 
 module AsciiDataTools
@@ -88,18 +89,18 @@ STR
         
         filter = ParsingFilter.new(record_types)
         filter << input_source_containing(DECODED_FIXED_LENGTH_RECORD)
-        filter.read.should == Record.new(type, ["12345", "abc", "\n"])
+        filter.read.should == AsciiDataTools::Record::Record.new(type, ["12345", "abc", "\n"])
       end
       
       it "should identify a decoded record and encode it" do
-        type = UnknownType.new
+        type = AsciiDataTools::RecordType::UnknownType.new
         record_types = mock(AsciiDataTools::RecordType::RecordTypeRepository)
         record_types.should_receive(:find_by_name).with("unknown").twice.and_return(type)
         
         filter = ParsingFilter.new(record_types)
         filter << input_source_containing(SEVERAL_FIXED_LENGTH_RECORDS)
-        filter.read.should == Record.new(type, ["12345"])
-        filter.read.should == Record.new(type, ["abc"])
+        filter.read.should == AsciiDataTools::Record::Record.new(type, ["12345"])
+        filter.read.should == AsciiDataTools::Record::Record.new(type, ["abc"])
       end
     end
   end
