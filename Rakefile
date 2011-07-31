@@ -31,7 +31,7 @@ end
 
 desc "Run all storytests"
 Cucumber::Rake::Task.new(:features) do |t|
-  t.cucumber_opts = "--format pretty" 
+  t.cucumber_opts = "features --format pretty" 
 end
 
 desc "Run all examples"
