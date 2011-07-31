@@ -1,6 +1,7 @@
+require 'bundler/gem_tasks'
+
 require 'cucumber/rake/task'
 require 'spec/rake/spectask'
-require 'rake/gempackagetask'
 
 desc "Profile ascii-data-cat"
 task :profile do
@@ -37,13 +38,3 @@ desc "Run all examples"
 Spec::Rake::SpecTask.new(:spec) do |t|
   t.spec_files = FileList['spec/**/*_spec.rb']
 end
-
-task :build do
-  system "gem build ascii-data-tools.gemspec"
-end
- 
-task :install_gem => :build do
-  `sudo gem install *.gem --no-ri --no-rdoc`
-end
-
-task :default => :install_gem
