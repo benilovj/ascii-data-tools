@@ -1,3 +1,3 @@
 module AsciiDataTools
-  VERSION = "0.3"
+  VERSION = "0.9"
 end
