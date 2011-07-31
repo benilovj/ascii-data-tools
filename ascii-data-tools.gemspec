@@ -1,19 +1,24 @@
-require 'rake'
+# -*- encoding: utf-8 -*-
+$:.push File.expand_path("../lib", __FILE__)
+require "ascii-data-tools/version"
 
 Gem::Specification.new do |s|
   s.platform = Gem::Platform::RUBY
   s.required_ruby_version = '>= 1.8.7'
   s.summary = "A tool for decoding and modifying ASCII CDRs."
   s.name = 'ascii-data-tools'
-  s.version = "0.3"
-  s.author = 'Jake Benilov'
-  s.email = 'benilov@gmail.com'
+  s.version = AsciiDataTools::VERSION
+  s.authors = ['Jake Benilov']
+  s.email = ['benilov@gmail.com']
   s.homepage = 'http://github.com/benilovj/ascii-data-tools'
   s.requirements << 'none'
-  s.require_path = 'lib'
   s.bindir = 'bin'
-  s.executables = ['ascii-data-cat', 'ascii-data-norm', 'ascii-data-tools-config', 'ascii-data-qdiff', 'ascii-data-edit']
-  s.files = FileList["{lib,spec,features}/**/*"].to_a + ['Rakefile']
+  
+  s.files         = `git ls-files`.split("\n")
+  s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
+  s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
+  s.require_paths = ["lib"]
+  
   s.description = s.summary
   s.has_rdoc = false
 
