@@ -1,4 +1,4 @@
-Spec::Matchers.define :output do |expected_output|
+RSpec::Matchers.define :output do |expected_output|
   chain :from_upstream do |*filters|
     @filters = filters.map {|filter| filter.is_a?(String) ? input_source_containing(filter) : filter }
   end

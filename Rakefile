@@ -1,7 +1,7 @@
 require 'bundler/gem_tasks'
 
 require 'cucumber/rake/task'
-require 'spec/rake/spectask'
+require 'rspec/core/rake_task'
 
 desc "Profile ascii-data-cat"
 task :profile do
@@ -34,9 +34,6 @@ Cucumber::Rake::Task.new(:features) do |t|
   t.cucumber_opts = "features --format pretty" 
 end
 
-desc "Run all examples"
-Spec::Rake::SpecTask.new(:spec) do |t|
-  t.spec_files = FileList['spec/**/*_spec.rb']
-end
+RSpec::Core::RakeTask.new
 
 task :default => [:spec, :features]
