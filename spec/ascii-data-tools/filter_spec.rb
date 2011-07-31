@@ -1,5 +1,5 @@
-require File.join(File.dirname(__FILE__), '..', 'spec_helper')
-require File.join(File.dirname(__FILE__), '..', 'filter_helper')
+require 'spec_helper'
+require 'filter_helper'
 
 require 'ascii-data-tools/configuration'
 require 'ascii-data-tools/filter'

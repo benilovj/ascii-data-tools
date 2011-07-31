@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
 
   s.add_runtime_dependency('terminal-table', '~> 1.4.2')
   
-  s.add_development_dependency('rspec', '~> 1.3.1')
+  s.add_development_dependency('rspec')
   s.add_development_dependency('cucumber')
   s.add_development_dependency('ruby-prof')
 end

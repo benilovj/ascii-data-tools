@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '..', 'spec_helper')
+require 'spec_helper'
 
 describe "the default configuration" do
   it "should add the EXAMPLE01 type to the configuration" do

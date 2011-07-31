@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '..', 'spec_helper')
+require 'spec_helper'
 require 'ascii-data-tools/configuration_printer'
 
 module AsciiDataTools

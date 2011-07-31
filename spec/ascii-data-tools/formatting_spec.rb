@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '..', 'spec_helper')
+require 'spec_helper'
 
 EXPECTED_FORMATTING_OF_FIXED_LENGTH_RECORD = <<STR
 Record 01 (ABC)
